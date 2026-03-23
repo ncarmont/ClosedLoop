@@ -7,70 +7,15 @@ let debuggingTabId = null;
 let consoleErrors = [];
 let networkErrors = [];
 
-// ── Agent banner (pill at top — no page border ring) ──────────────────────────
-//
-// Actively removes any full-page ring overlay that may be in the DOM from a
-// previous extension version, then injects only the animated banner pill.
+// ── Cleanup injector — removes any ring/overlay left by old extension versions ──
 
 function showAgentRing(tabId) {
+  // Intentionally only runs cleanup. No ring, no banner, nothing on the border.
   chrome.scripting.executeScript({
     target: { tabId },
     func: () => {
-      const RING_ID  = '__closeloop_ring__';
-      const STYLE_ID = '__closeloop_ring_style__';
-
-      // Remove whatever is currently there (old full-page ring OR banner pill)
-      const existing = document.getElementById(RING_ID);
-      if (existing) {
-        clearTimeout(existing.__closeloopTimer);
-        existing.remove();
-      }
-      document.getElementById(STYLE_ID)?.remove();
-
-      const style = document.createElement('style');
-      style.id = STYLE_ID;
-      style.textContent = `
-        /* Gradient sweeps slowly left-to-right through the banner */
-        @keyframes __closeloop_banner_sweep__ {
-          0%   { background-position: 0% 50%; }
-          100% { background-position: 300% 50%; }
-        }
-        @keyframes __closeloop_banner_in__ {
-          from { opacity: 0; transform: translateX(-50%) translateY(-6px); }
-          to   { opacity: 1; transform: translateX(-50%) translateY(0); }
-        }
-      `;
-      document.head.appendChild(style);
-
-      // No border ring — just the animated banner pill at the top
-      const label = document.createElement('div');
-      label.id = RING_ID; // reuse id so cleanup still works
-      label.style.cssText = `
-        position: fixed; top: 12px; left: 50%; transform: translateX(-50%);
-        z-index: 2147483647;
-        background: linear-gradient(90deg, #4c1d95, #7c3aed, #a78bfa, #c4b5fd, #a78bfa, #7c3aed, #4c1d95);
-        background-size: 300% 100%;
-        color: #fff;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        font-size: 12px; font-weight: 600; padding: 6px 16px; border-radius: 999px;
-        pointer-events: none;
-        border: 1px solid rgba(196,181,253,0.4);
-        box-shadow: 0 2px 16px rgba(124,58,237,0.55), 0 1px 3px rgba(0,0,0,0.4);
-        white-space: nowrap;
-        animation: __closeloop_banner_sweep__ 4s linear infinite, __closeloop_banner_in__ 0.3s ease forwards;
-        transition: opacity 0.8s ease;
-      `;
-      label.textContent = 'An AI agent is controlling this browser tab';
-
-      document.body.appendChild(label);
-
-      label.__closeloopTimer = setTimeout(() => {
-        label.style.opacity = '0';
-        setTimeout(() => {
-          label.remove();
-          document.getElementById(STYLE_ID)?.remove();
-        }, 800);
-      }, 9200);
+      document.getElementById('__closeloop_ring__')?.remove();
+      document.getElementById('__closeloop_ring_style__')?.remove();
     },
   }).catch(() => {});
 }
@@ -1167,13 +1112,33 @@ chrome.debugger.onEvent.addListener((source, method, params) => {
   }
 });
 
-// ── Cleanup on tab close ───────────────────────────────────────────────────────
+// ── Cleanup on tab events ──────────────────────────────────────────────────────
+
+function clearSessionState() {
+  chrome.storage.local.set({
+    actionHistory: [],
+    pendingApproval: null,
+    approvalResponse: null,
+    mobileEmulationActive: false,
+    debuggerActive: false,
+  }).catch(() => {});
+}
 
 chrome.tabs.onRemoved.addListener((tabId) => {
   if (tabId === debuggingTabId) {
     debuggingTabId = null;
-    chrome.storage.local.set({ debuggerActive: false });
   }
+  clearSessionState();
+});
+
+// Clear history whenever the user switches to a different tab
+chrome.tabs.onActivated.addListener(() => {
+  clearSessionState();
+});
+
+// Clear history whenever a new tab is created
+chrome.tabs.onCreated.addListener(() => {
+  clearSessionState();
 });
 
 connect();
