@@ -24,6 +24,10 @@ It navigates. It clicks. It types. It screenshots. It reads console errors.
 ![Node.js](https://img.shields.io/badge/Node.js-18+-38bdf8?style=flat-square&logo=nodedotjs&logoColor=white)
 ![localhost only](https://img.shields.io/badge/runs-localhost%20only-334155?style=flat-square)
 
+<br/>
+
+<img src="assets/demo.gif" alt="CloseLoop in action" width="100%"/>
+
 </div>
 
 ---
