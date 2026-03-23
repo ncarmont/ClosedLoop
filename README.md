@@ -5,11 +5,9 @@
 
 <br/>
 
-### 😤 Before
-*Your AI writes the code. You open the browser, check if it worked, copy the error, paste it back, repeat.*
+😤 **Before:** Your AI writes the code. You open the browser, check if it worked, copy the error, paste it back, repeat.
 
-### ☕ After
-*ClosedLoop does that part. You just drink the coffee.*
+☕ **After:** This skill/extension gives your AI access to your browser so it can check for itself.
 
 <br/>
 
