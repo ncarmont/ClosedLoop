@@ -8,7 +8,7 @@
 
 <br/>
 
-😤 **Before:** We all know the loop — your AI agent writes code, can't see the browser, and asks you to open it. You screenshot, paste the error back, and repeat.
+😤 **Before:** We all know the loop — your AI agent writes code, can't see the browser, and asks you to open it. You screenshot, paste the error back, and repeat. You're basically a screenshotting intern for your own AI.
 
 ☕ **After:** This skill/extension gives your AI access to your browser so it can check for itself — and shows you everything it intends to click before it does it.
 
