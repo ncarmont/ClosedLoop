@@ -2,6 +2,8 @@
 
 # ☕ ClosedLoop — Claude Code Skill & Chrome Extension
 
+<img src="assets/badges.png" alt="ClosedLoop badges" width="100%"/>
+
 #### Less browser screenshotting, more coffee breaks
 
 <br/>
