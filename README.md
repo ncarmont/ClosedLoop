@@ -1,7 +1,6 @@
 <div align="center">
 
-# ☕ ClosedLoop
-#### Claude Code Skill & Chrome Extension
+# ☕ ClosedLoop — Claude Code Skill & Chrome Extension
 
 <br/>
 
