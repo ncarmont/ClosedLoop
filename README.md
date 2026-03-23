@@ -4,7 +4,7 @@
 
 <img src="assets/badges.png" alt="ClosedLoop badges" width="100%"/>
 
-### Less browser screenshotting, more coffee breaks ☕
+## Less browser screenshotting for your AI, more coffee breaks ☕
 
 <br/>
 
