@@ -1,4 +1,4 @@
-// ClosedLoop - background service worker
+// CloseLoop - background service worker
 // Connects to the local MCP bridge at ws://localhost:9009
 
 const WS_URL = 'ws://localhost:9009';
@@ -269,7 +269,7 @@ async function injectSidebar(tabId) {
         sidebar.id = '__closeloop_sidebar__';
         sidebar.innerHTML = `
           <div id="__cl_hdr__">
-            <span class="__cl_logo__">ClosedLoop</span>
+            <span class="__cl_logo__">CloseLoop</span>
             <span class="__cl_badge__">BETA</span>
             <button id="__cl_close__" title="Close">✕</button>
           </div>
@@ -291,7 +291,7 @@ async function injectSidebar(tabId) {
         const tab = document.createElement('button');
         tab.id = '__cl_tab__';
         tab.textContent = 'CL';
-        tab.title = 'Open ClosedLoop panel';
+        tab.title = 'Open CloseLoop panel';
         document.body.appendChild(tab);
 
         // Show debug banner immediately if debugger is already attached

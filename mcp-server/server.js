@@ -33,7 +33,7 @@ let lastAgentCall = null; // track when the AI agent last used the API
 
 wss.on('connection', (ws) => {
   extensionSocket = ws;
-  process.stdout.write('[ClosedLoop] Chrome extension connected\n');
+  process.stdout.write('[CloseLoop] Chrome extension connected\n');
 
   ws.on('message', (data) => {
     try {
@@ -48,7 +48,7 @@ wss.on('connection', (ws) => {
 
   ws.on('close', () => {
     extensionSocket = null;
-    process.stdout.write('[ClosedLoop] Chrome extension disconnected\n');
+    process.stdout.write('[CloseLoop] Chrome extension disconnected\n');
   });
 });
 
@@ -56,7 +56,7 @@ async function sendToExtension(command, params = {}) {
   if (!extensionSocket || extensionSocket.readyState !== 1) {
     throw new Error(
       'Chrome extension not connected. ' +
-      'Make sure ClosedLoop is installed and the popup shows a green dot.'
+      'Make sure CloseLoop is installed and the popup shows a green dot.'
     );
   }
   const id = nextId++;
@@ -202,8 +202,8 @@ app.post('/reset-history', async (req, res) => {
 // ── Start ─────────────────────────────────────────────────────────────────────
 
 httpServer.listen(PORT, 'localhost', () => {
-  process.stdout.write(`\n[ClosedLoop] Server running at http://localhost:${PORT}\n`);
-  process.stdout.write('[ClosedLoop] Waiting for Chrome extension to connect...\n\n');
+  process.stdout.write(`\n[CloseLoop] Server running at http://localhost:${PORT}\n`);
+  process.stdout.write('[CloseLoop] Waiting for Chrome extension to connect...\n\n');
   process.stdout.write('AI agent endpoints:\n');
   process.stdout.write(`  GET  http://localhost:${PORT}/context\n`);
   process.stdout.write(`  POST http://localhost:${PORT}/screenshot   (saves to /tmp/closedloop-screenshot.png)\n`);

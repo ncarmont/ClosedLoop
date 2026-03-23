@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "ClosedLoop",
+  "name": "CloseLoop",
   "version": "0.3.0",
   "description": "Give your AI coding agent your real browser. Beta/experimental.",
   "permissions": [
@@ -21,7 +21,7 @@
   },
   "action": {
     "default_popup": "popup.html",
-    "default_title": "ClosedLoop"
+    "default_title": "CloseLoop"
   },
   "side_panel": {
     "default_path": "sidepanel.html"

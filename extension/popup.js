@@ -1,7 +1,7 @@
 const SERVER = 'http://localhost:9009';
 const AGENT_ACTIVE_WINDOW_MS = 10_000; // show "AI agent active" for 10s after last call
 
-const INSTRUCTIONS = `You have access to ClosedLoop — a live HTTP bridge to my real Chrome browser.
+const INSTRUCTIONS = `You have access to CloseLoop — a live HTTP bridge to my real Chrome browser.
 The server is running at http://localhost:9009.
 
 Use these curl commands (via the Bash tool) to interact with my browser:

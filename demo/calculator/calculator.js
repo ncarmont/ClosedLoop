@@ -1,5 +1,5 @@
 // Calculator logic
-// NOTE: This file has 3 bugs for the ClosedLoop demo:
+// NOTE: This file has 3 bugs for the CloseLoop demo:
 //   Bug 1 (visual)  — style.css: calculator width too narrow, display clips long numbers
 //   Bug 2 (logic)   — subtraction operator mistakenly adds instead of subtracts
 //   Bug 3 (runtime) — clearAll references a variable that doesn't exist → console error
