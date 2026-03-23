@@ -2,7 +2,7 @@
 
 # ☕ ClosedLoop - Claude Code Skill & Chrome Extension
 
-## Stop screenshotting for your AI coding tool. Have more coffee breaks instead. ☕
+## Have coffee breaks instead. Stop screenshotting for your AI coding tool. ☕
 
 <br/>
 
