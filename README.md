@@ -1,21 +1,19 @@
 <div align="center">
 
-# ☕ CloseLoop
+# ☕ ClosedLoop
 #### Claude Code Skill & Chrome Extension
 
-### Your AI writes the code. You open the browser, check if it worked, copy the error, paste it back, repeat.
-### CloseLoop does that part. You just drink the coffee.
+<br/>
+
+### 😤 Before
+*Your AI writes the code. You open the browser, check if it worked, copy the error, paste it back, repeat.*
+
+### ☕ After
+*ClosedLoop does that part. You just drink the coffee.*
 
 <br/>
 
-> **⚠️ Public Beta — built for hobbyists and tinkerers.**
-> Expect rough edges. Works great. Not production-hardened. Ship it anyway.
-
-<br/>
-
-CloseLoop gives your AI coding agent your **real, signed-in Chrome browser** — the one with your cookies, your sessions, your localhost app running.
-It navigates. It clicks. It types. It screenshots. It reads console errors.
-**You go get another coffee.**
+<img src="assets/demo-v2.gif" alt="ClosedLoop in action" width="100%"/>
 
 <br/>
 
@@ -25,11 +23,24 @@ It navigates. It clicks. It types. It screenshots. It reads console errors.
 ![Node.js](https://img.shields.io/badge/Node.js-18+-38bdf8?style=flat-square&logo=nodedotjs&logoColor=white)
 ![localhost only](https://img.shields.io/badge/runs-localhost%20only-334155?style=flat-square)
 
-<br/>
-
-<img src="assets/demo.gif" alt="CloseLoop in action" width="100%"/>
-
 </div>
+
+---
+
+## ⚠️ WARNING — Public Beta. Not Safe For Production.
+
+> **This tool gives an AI agent live control of your real Chrome browser.**
+>
+> **Do not use on corporate machines, shared systems, or anywhere with data you care about.**
+
+ClosedLoop is a hobbyist project in public beta. A few honest notes:
+
+- 🚧 **Not production-hardened** — don't run this on a shared or corporate machine
+- 🔓 **The agent has real browser access** — it can click, type, and submit anything on any open tab
+- 🐛 **Rough edges exist** — file an issue if something bites you
+- 💡 **Use `/request-approval`** to pause and confirm before anything destructive
+
+Built for tinkerers. Works great for personal use. Ship it, but know what you're shipping.
 
 ---
 
@@ -42,20 +53,20 @@ You're not the developer anymore. **You're the browser intern.**
 <br/>
 
 <div align="center">
-<img src="assets/before.svg" alt="Before CloseLoop — you are the loop" width="100%"/>
+<img src="assets/before.svg" alt="Before ClosedLoop — you are the loop" width="100%"/>
 </div>
 
 <br/>
 
 ## ☕ Close the loop
 
-CloseLoop connects your agent directly to a live Chrome tab over a secure local bridge.
+ClosedLoop connects your agent directly to a live Chrome tab over a secure local bridge.
 The agent navigates, screenshots, clicks, types, and reads its own errors — **all without you lifting a finger.**
 
 <br/>
 
 <div align="center">
-<img src="assets/after.svg" alt="After CloseLoop — the loop is closed" width="100%"/>
+<img src="assets/after.svg" alt="After ClosedLoop — the loop is closed" width="100%"/>
 </div>
 
 ---
@@ -65,7 +76,7 @@ The agent navigates, screenshots, clicks, types, and reads its own errors — **
 <br/>
 
 <div align="center">
-<img src="assets/architecture.svg" alt="CloseLoop architecture" width="100%"/>
+<img src="assets/architecture.svg" alt="ClosedLoop architecture" width="100%"/>
 </div>
 
 <br/>
@@ -96,11 +107,11 @@ The moment your agent takes control, your browser tells you about it:
 
 <div align="center">
 <br/>
-<img src="assets/screenshot-ring.png" alt="CloseLoop element highlight and agent banner on the demo calculator" width="80%"/>
+<img src="assets/screenshot-ring.png" alt="ClosedLoop element highlight and agent banner on the demo calculator" width="80%"/>
 <br/>
 <em>Element spotlight + agent banner on the demo calculator page.</em>
 <br/><br/>
-<img src="assets/screenshot-popup.png" alt="CloseLoop extension popup" width="280"/>
+<img src="assets/screenshot-popup.png" alt="ClosedLoop extension popup" width="280"/>
 <br/>
 <em>The extension popup — green dot means connected, action log updates in real time.</em>
 </div>
@@ -150,7 +161,7 @@ node mcp-server/server.js
 1. Open Chrome → `chrome://extensions`
 2. Enable **Developer mode** (top-right toggle)
 3. Click **Load unpacked** → select the `extension/` folder
-4. Pin the CloseLoop icon — badge turns **green** when connected
+4. Pin the ClosedLoop icon — badge turns **green** when connected
 
 ### 4️⃣ Point your agent at it
 
@@ -179,19 +190,6 @@ This is a **local-only tool**. Here's what that means in practice:
 - 🍪 Your browser sessions, cookies, and auth tokens stay on your machine
 - 🚫 No cloud relay, no telemetry, no remote control surface
 - ✅ The extension uses `"host_permissions": ["<all_urls>"]` — required for scripting and debugger APIs, standard for browser automation
-
----
-
-## ⚠️ Beta Disclaimer
-
-CloseLoop is a **hobbyist project in public beta**. It works well for personal use and tinkering with AI agents. A few honest notes:
-
-- 🚧 Not production-hardened — don't run this on a shared or corporate machine
-- 🐛 Rough edges exist — file an issue if something bites you
-- 🔓 The agent has real browser access — use `/request-approval` for anything destructive
-- 💡 Built for Claude Code but works with any agent that can run `curl`
-
-If it breaks, [open an issue](https://github.com/ncarmont/closeloop/issues). If it saves you an hour of babysitting, give it a ⭐.
 
 ---
 
@@ -230,7 +228,7 @@ MIT — see [LICENSE](LICENSE)
 
 <div align="center">
 
-**CloseLoop** · Built for developers who have better things to do than babysit their agent.
+**ClosedLoop** · Built for developers who have better things to do than babysit their agent.
 
 *The loop is closed. Go get that coffee. ☕*
 
