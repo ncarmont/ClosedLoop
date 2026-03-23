@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "ClosedLoop",
+  "version": "0.1.0",
+  "description": "Give your coding agent your real browser. Beta/experimental.",
+  "permissions": [
+    "activeTab",
+    "tabs",
+    "debugger",
+    "scripting",
+    "storage",
+    "alarms"
+  ],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "ClosedLoop"
+  }
+}

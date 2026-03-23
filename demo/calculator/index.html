@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculator App</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <h1>Calculator</h1>
+    <div class="calculator">
+      <div class="display">
+        <div class="expression" id="expression"></div>
+        <div class="result" id="result">0</div>
+      </div>
+      <div class="buttons">
+        <button class="btn btn-clear" id="clear" onclick="clearAll()">C</button>
+        <button class="btn btn-op" onclick="inputOp('%')">%</button>
+        <button class="btn btn-op" onclick="inputOp('/')">÷</button>
+        <button class="btn btn-op" onclick="inputOp('*')">×</button>
+
+        <button class="btn" onclick="inputNum('7')">7</button>
+        <button class="btn" onclick="inputNum('8')">8</button>
+        <button class="btn" onclick="inputNum('9')">9</button>
+        <button class="btn btn-op" onclick="inputOp('-')">−</button>
+
+        <button class="btn" onclick="inputNum('4')">4</button>
+        <button class="btn" onclick="inputNum('5')">5</button>
+        <button class="btn" onclick="inputNum('6')">6</button>
+        <button class="btn btn-op" onclick="inputOp('+')">+</button>
+
+        <button class="btn" onclick="inputNum('1')">1</button>
+        <button class="btn" onclick="inputNum('2')">2</button>
+        <button class="btn" onclick="inputNum('3')">3</button>
+        <button class="btn btn-equals" rowspan="2" onclick="calculate()">=</button>
+
+        <button class="btn btn-zero" onclick="inputNum('0')">0</button>
+        <button class="btn" onclick="inputNum('.')">.</button>
+      </div>
+    </div>
+    <div class="history" id="history">
+      <h2>History</h2>
+      <ul id="history-list"></ul>
+    </div>
+  </div>
+  <script src="calculator.js"></script>
+</body>
+</html>

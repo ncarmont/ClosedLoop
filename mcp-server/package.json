@@ -1,0 +1,14 @@
+{
+  "name": "closeloop-mcp",
+  "version": "0.1.0",
+  "description": "CloseLoop MCP server — give your coding agent your real browser",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.10.2",
+    "ws": "^8.18.0"
+  }
+}

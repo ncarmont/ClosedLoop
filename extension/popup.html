@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      width: 300px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      padding: 16px;
+      background: #0f172a;
+      color: #f1f5f9;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .logo {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.5px;
+    }
+    .badge {
+      font-size: 9px;
+      font-weight: 600;
+      background: #7c3aed;
+      color: #fff;
+      padding: 2px 6px;
+      border-radius: 3px;
+      letter-spacing: 0.5px;
+    }
+    .status-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      background: #1e293b;
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .dot.on  { background: #22c55e; box-shadow: 0 0 6px #22c55e80; }
+    .dot.off { background: #ef4444; }
+    .status-label { font-size: 13px; font-weight: 500; }
+
+    /* Copy button — the main CTA */
+    .copy-btn {
+      width: 100%;
+      padding: 11px 14px;
+      background: #6d28d9;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      transition: background 0.15s;
+    }
+    .copy-btn:hover  { background: #7c3aed; }
+    .copy-btn:active { background: #5b21b6; }
+    .copy-btn.copied { background: #16a34a; }
+    .copy-btn svg { flex-shrink: 0; }
+    .copy-hint {
+      font-size: 10px;
+      color: #475569;
+      text-align: center;
+      margin-top: -8px;
+      margin-bottom: 12px;
+    }
+
+    .section { margin-bottom: 12px; }
+    .section-title {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      color: #475569;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .code-block {
+      background: #1e293b;
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 10px;
+      font-family: "SF Mono", Menlo, monospace;
+      color: #7dd3fc;
+      line-height: 1.6;
+      word-break: break-all;
+    }
+    .tab-info {
+      background: #1e293b;
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 11px;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+    .tab-url {
+      color: #64748b;
+      font-size: 10px;
+      margin-top: 2px;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <span class="logo">ClosedLoop</span>
+    <span class="badge">BETA</span>
+  </div>
+
+  <div class="status-row">
+    <div class="dot" id="dot"></div>
+    <span class="status-label" id="status-text">Checking...</span>
+  </div>
+
+  <button class="copy-btn" id="copy-btn">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <rect x="9" y="9" width="13" height="13" rx="2"/>
+      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+    </svg>
+    <span id="copy-label">Copy instructions for your AI</span>
+  </button>
+  <div class="copy-hint">Paste into Claude Code / Cursor to connect</div>
+
+  <div class="section">
+    <div class="section-title">Active Tab</div>
+    <div class="tab-info">
+      <div id="tab-title">—</div>
+      <div class="tab-url" id="tab-url">—</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">MCP Server Config</div>
+    <div class="code-block" id="config-path">Loading...</div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
