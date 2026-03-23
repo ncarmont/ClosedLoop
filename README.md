@@ -13,7 +13,7 @@
 
 <br/>
 
-<img src="assets/demo-v2.gif" alt="ClosedLoop in action" width="100%"/>
+<img src="assets/demo-v3.gif" alt="ClosedLoop in action" width="100%"/>
 
 <br/>
 
