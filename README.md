@@ -2,7 +2,7 @@
 
 # ☕ ClosedLoop — Claude Code Skill & Chrome Extension
 
-#### Less browser screenshotting, more coffees
+#### Less browser screenshotting, more coffee breaks
 
 <br/>
 
