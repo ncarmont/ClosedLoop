@@ -1,4 +1,4 @@
-// CloseLoop - background service worker
+// ClosedLoop - background service worker
 // Connects to the local MCP bridge at ws://localhost:9009
 
 const WS_URL = 'ws://localhost:9009';
@@ -269,7 +269,7 @@ async function injectSidebar(tabId) {
         sidebar.id = '__closeloop_sidebar__';
         sidebar.innerHTML = `
           <div id="__cl_hdr__">
-            <span class="__cl_logo__">CloseLoop</span>
+            <span class="__cl_logo__">ClosedLoop</span>
             <span class="__cl_badge__">BETA</span>
             <button id="__cl_close__" title="Close">✕</button>
           </div>
@@ -291,7 +291,7 @@ async function injectSidebar(tabId) {
         const tab = document.createElement('button');
         tab.id = '__cl_tab__';
         tab.textContent = 'CL';
-        tab.title = 'Open CloseLoop panel';
+        tab.title = 'Open ClosedLoop panel';
         document.body.appendChild(tab);
 
         // Show debug banner immediately if debugger is already attached
@@ -635,74 +635,7 @@ async function removeElementHighlight(tabId) {
   } catch {}
 }
 
-// ── Approval bubble + request ──────────────────────────────────────────────────
-//
-// showApprovalBubble injects a centered attention overlay on the page so the
-// user immediately knows to look at the side panel and click Approve or Deny.
-
-function showApprovalBubble(tabId) {
-  chrome.scripting.executeScript({
-    target: { tabId },
-    func: () => {
-      document.getElementById('__cl_approval_bubble__')?.remove();
-
-      if (!document.getElementById('__cl_bubble_style__')) {
-        const s = document.createElement('style');
-        s.id = '__cl_bubble_style__';
-        s.textContent = `
-          @keyframes __cl_bubble_pulse__ {
-            0%,100% { box-shadow: 0 0 0 1px #f59e0b50, 0 8px 40px #000c, 0 0 40px #f59e0b28; }
-            50%      { box-shadow: 0 0 0 3px #f59e0ba0, 0 8px 40px #000c, 0 0 80px #f59e0b50; }
-          }
-          @keyframes __cl_arrow_bob__ {
-            0%,100% { transform: translateX(0); }
-            50%      { transform: translateX(5px); }
-          }
-        `;
-        document.head.appendChild(s);
-      }
-
-      const bubble = document.createElement('div');
-      bubble.id = '__cl_approval_bubble__';
-      bubble.style.cssText = `
-        position: fixed;
-        top: 50%; left: 50%;
-        transform: translate(-50%, -50%);
-        z-index: 2147483646;
-        background: rgba(26,17,0,0.97);
-        border: 2px solid #f59e0b;
-        border-radius: 18px;
-        padding: 22px 32px;
-        text-align: center;
-        pointer-events: none;
-        min-width: 260px;
-        max-width: 340px;
-        animation: __cl_bubble_pulse__ 1.8s ease-in-out infinite;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      `;
-      bubble.innerHTML = `
-        <div style="font-size:13px;font-weight:700;color:#fcd34d;margin-bottom:10px;letter-spacing:0.01em;">
-          ⚠ Action needs your approval
-        </div>
-        <div style="font-size:13px;color:#e2e8f0;line-height:1.5;display:flex;align-items:center;justify-content:center;gap:8px;">
-          <span>Please approve in the side panel</span>
-          <span style="font-size:18px;animation:__cl_arrow_bob__ 0.8s ease-in-out infinite;display:inline-block;">👉</span>
-        </div>
-      `;
-      document.body.appendChild(bubble);
-    },
-  }).catch(() => {});
-}
-
-function removeApprovalBubble(tabId) {
-  chrome.scripting.executeScript({
-    target: { tabId },
-    func: () => {
-      document.getElementById('__cl_approval_bubble__')?.remove();
-      document.getElementById('__cl_bubble_style__')?.remove();
-    },
-  }).catch(() => {});
-}
+// ── Approval request ──────────────────────────────────────────────────────────
 
 async function requestApproval({ action = 'Proceed with action', reason = '' } = {}) {
   const tab = await getActiveTab();
@@ -717,13 +650,10 @@ async function requestApproval({ action = 'Proceed with action', reason = '' } =
     approvalResponse: null,
   });
 
-  showApprovalBubble(tab.id);
-
   return new Promise((resolve) => {
     const timer = setTimeout(async () => {
       chrome.storage.onChanged.removeListener(listener);
       await chrome.storage.local.remove(['pendingApproval', 'approvalResponse']).catch(() => {});
-      removeApprovalBubble(tab.id);
       resolve({ approved: false, timedOut: true, reason: 'No response after 60s — action was denied by timeout' });
     }, 60_000);
 
@@ -735,7 +665,6 @@ async function requestApproval({ action = 'Proceed with action', reason = '' } =
       clearTimeout(timer);
       chrome.storage.onChanged.removeListener(listener);
       chrome.storage.local.remove(['pendingApproval', 'approvalResponse']).catch(() => {});
-      removeApprovalBubble(tab.id);
       resolve({ approved: val === 'approved' });
     }
 
