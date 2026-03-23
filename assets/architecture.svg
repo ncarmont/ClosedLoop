@@ -1,0 +1,102 @@
+<svg width="860" height="260" viewBox="0 0 860 260" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">
+  <defs>
+    <linearGradient id="abg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f172a"/>
+      <stop offset="100%" style="stop-color:#0d1526"/>
+    </linearGradient>
+    <filter id="ashadow">
+      <feDropShadow dx="0" dy="3" stdDeviation="6" flood-color="#000" flood-opacity="0.5"/>
+    </filter>
+    <filter id="apurpleglow">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="860" height="260" fill="url(#abg)" rx="12"/>
+
+  <!-- ── Node 1: Claude Code ── -->
+  <g filter="url(#ashadow)">
+    <rect x="40" y="70" width="170" height="120" rx="10" fill="#1e293b" stroke="#1e3a5f" stroke-width="1.5"/>
+    <rect x="40" y="70" width="170" height="36" rx="10" fill="#0f1c2e"/>
+    <rect x="40" y="94" width="170" height="12" fill="#0f1c2e"/>
+    <text x="125" y="94" text-anchor="middle" font-size="12" font-weight="700" fill="#f1f5f9">Claude Code</text>
+    <text x="125" y="107" text-anchor="middle" font-size="9" fill="#475569" letter-spacing="0.5">AI CODING AGENT</text>
+    <text x="125" y="135" text-anchor="middle" font-size="10" fill="#94a3b8">Bash tool</text>
+    <text x="125" y="152" text-anchor="middle" font-size="10" fill="#94a3b8">curl commands</text>
+    <text x="125" y="169" text-anchor="middle" font-size="10" fill="#94a3b8">Read (screenshots)</text>
+  </g>
+
+  <!-- ── Arrow 1 → 2 ── -->
+  <g>
+    <line x1="212" y1="125" x2="262" y2="125" stroke="#334155" stroke-width="1.5"/>
+    <polygon points="259,120 269,125 259,130" fill="#334155"/>
+    <text x="237" y="115" text-anchor="middle" font-size="8" fill="#475569">HTTP</text>
+    <line x1="262" y1="137" x2="212" y2="137" stroke="#334155" stroke-width="1.5" opacity="0.6"/>
+    <polygon points="215,132 205,137 215,142" fill="#334155" opacity="0.6"/>
+    <text x="237" y="150" text-anchor="middle" font-size="8" fill="#334155">JSON</text>
+  </g>
+
+  <!-- ── Node 2: MCP Server ── -->
+  <g filter="url(#ashadow)">
+    <rect x="266" y="70" width="170" height="120" rx="10" fill="#1e293b" stroke="#1e3a5f" stroke-width="1.5"/>
+    <rect x="266" y="70" width="170" height="36" rx="10" fill="#0f1c2e"/>
+    <rect x="266" y="94" width="170" height="12" fill="#0f1c2e"/>
+    <text x="351" y="94" text-anchor="middle" font-size="12" font-weight="700" fill="#f1f5f9">MCP Server</text>
+    <text x="351" y="107" text-anchor="middle" font-size="9" fill="#475569" letter-spacing="0.5">NODE.JS · PORT 9009</text>
+    <text x="351" y="135" text-anchor="middle" font-size="10" fill="#94a3b8">Express HTTP routes</text>
+    <text x="351" y="152" text-anchor="middle" font-size="10" fill="#94a3b8">WebSocket bridge</text>
+    <text x="351" y="169" text-anchor="middle" font-size="10" fill="#94a3b8">localhost only 🔒</text>
+  </g>
+
+  <!-- ── Arrow 2 → 3 ── -->
+  <g>
+    <line x1="438" y1="125" x2="488" y2="125" stroke="#4c1d95" stroke-width="2"/>
+    <polygon points="485,120 495,125 485,130" fill="#4c1d95"/>
+    <text x="463" y="115" text-anchor="middle" font-size="8" fill="#7c3aed">WebSocket</text>
+    <line x1="488" y1="137" x2="438" y2="137" stroke="#4c1d95" stroke-width="2" opacity="0.6"/>
+    <polygon points="441,132 431,137 441,142" fill="#4c1d95" opacity="0.6"/>
+    <text x="463" y="150" text-anchor="middle" font-size="8" fill="#4c1d95">events</text>
+  </g>
+
+  <!-- ── Node 3: Extension ── -->
+  <g filter="url(#ashadow)">
+    <rect x="492" y="70" width="170" height="120" rx="10" fill="#1e1b4b" stroke="#4c1d95" stroke-width="1.5"/>
+    <rect x="492" y="70" width="170" height="36" rx="10" fill="#2d1f6e"/>
+    <rect x="492" y="94" width="170" height="12" fill="#2d1f6e"/>
+    <text x="577" y="94" text-anchor="middle" font-size="12" font-weight="700" fill="#f1f5f9">Chrome Extension</text>
+    <text x="577" y="107" text-anchor="middle" font-size="9" fill="#a78bfa" letter-spacing="0.5">MANIFEST V3</text>
+    <text x="577" y="135" text-anchor="middle" font-size="10" fill="#94a3b8">chrome.scripting</text>
+    <text x="577" y="152" text-anchor="middle" font-size="10" fill="#94a3b8">chrome.debugger</text>
+    <text x="577" y="169" text-anchor="middle" font-size="10" fill="#94a3b8">captureVisibleTab</text>
+  </g>
+
+  <!-- ── Arrow 3 → 4 ── -->
+  <g>
+    <line x1="664" y1="125" x2="714" y2="125" stroke="#7c3aed" stroke-width="2"/>
+    <polygon points="711,120 721,125 711,130" fill="#7c3aed"/>
+    <text x="689" y="115" text-anchor="middle" font-size="8" fill="#7c3aed">Chrome APIs</text>
+    <line x1="714" y1="137" x2="664" y2="137" stroke="#7c3aed" stroke-width="2" opacity="0.6"/>
+    <polygon points="667,132 657,137 667,142" fill="#7c3aed" opacity="0.6"/>
+    <text x="689" y="150" text-anchor="middle" font-size="8" fill="#4c1d95">DOM / network</text>
+  </g>
+
+  <!-- ── Node 4: Browser ── -->
+  <g filter="url(#ashadow)">
+    <!-- Glow effect -->
+    <rect x="715" y="65" width="178" height="130" rx="13" fill="none" stroke="#7c3aed" stroke-width="2.5" filter="url(#apurpleglow)" opacity="0.7"/>
+    <rect x="718" y="70" width="170" height="120" rx="10" fill="#1e1b4b" stroke="#7c3aed" stroke-width="1.5"/>
+    <rect x="718" y="70" width="170" height="36" rx="10" fill="#2d1f6e"/>
+    <rect x="718" y="94" width="170" height="12" fill="#2d1f6e"/>
+    <text x="803" y="94" text-anchor="middle" font-size="12" font-weight="700" fill="#f1f5f9">Your Browser</text>
+    <text x="803" y="107" text-anchor="middle" font-size="9" fill="#a78bfa" letter-spacing="0.5">REAL CHROME · ALL SESSIONS</text>
+    <text x="803" y="135" text-anchor="middle" font-size="10" fill="#94a3b8">Active tab DOM</text>
+    <text x="803" y="152" text-anchor="middle" font-size="10" fill="#94a3b8">Console + network</text>
+    <text x="803" y="169" text-anchor="middle" font-size="10" fill="#94a3b8">Your cookies + auth ✓</text>
+  </g>
+
+  <!-- ── Bottom note ── -->
+  <text x="430" y="225" text-anchor="middle" font-size="11" fill="#334155">Everything runs on localhost. No data leaves your machine. Browser sessions and credentials stay yours.</text>
+  <rect x="360" y="236" width="140" height="18" rx="9" fill="#1e1b4b"/>
+  <text x="430" y="249" text-anchor="middle" font-size="10" fill="#a78bfa" font-weight="600">🔒 Localhost only</text>
+</svg>

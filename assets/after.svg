@@ -1,0 +1,166 @@
+<svg width="900" height="420" viewBox="0 0 900 420" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">
+  <defs>
+    <linearGradient id="bg2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f172a"/>
+      <stop offset="100%" style="stop-color:#0d1526"/>
+    </linearGradient>
+    <linearGradient id="card2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e293b"/>
+      <stop offset="100%" style="stop-color:#172031"/>
+    </linearGradient>
+    <linearGradient id="bridge" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#4c1d95"/>
+      <stop offset="100%" style="stop-color:#7c3aed"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="shadow2">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000" flood-opacity="0.4"/>
+    </filter>
+    <filter id="purpleglow">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="900" height="420" fill="url(#bg2)"/>
+
+  <!-- Label -->
+  <rect x="20" y="16" width="70" height="22" rx="4" fill="#1e1b4b"/>
+  <text x="55" y="31" text-anchor="middle" font-size="11" font-weight="600" fill="#a78bfa" letter-spacing="0.8">AFTER</text>
+
+  <!-- ── Left card: Claude Code ── -->
+  <g filter="url(#shadow2)">
+    <rect x="40" y="60" width="240" height="290" rx="10" fill="url(#card2)" stroke="#2d1f6e" stroke-width="1"/>
+    <rect x="40" y="60" width="240" height="32" rx="10" fill="#1e293b"/>
+    <rect x="40" y="78" width="240" height="14" fill="#1e293b"/>
+    <circle cx="60" cy="76" r="5" fill="#ef4444" opacity="0.7"/>
+    <circle cx="76" cy="76" r="5" fill="#f59e0b" opacity="0.7"/>
+    <circle cx="92" cy="76" r="5" fill="#22c55e" opacity="0.7"/>
+    <text x="156" y="80" text-anchor="middle" font-size="11" fill="#475569">claude code</text>
+
+    <!-- curl commands -->
+    <text x="56" y="114" font-size="9" fill="#475569" font-family="'SF Mono', Menlo, monospace">$ curl localhost:9009/navigate</text>
+    <rect x="52" y="120" width="212" height="16" rx="3" fill="#0f1f35"/>
+    <text x="158" y="132" text-anchor="middle" font-size="9" fill="#22c55e" font-family="'SF Mono', Menlo, monospace">✓ {"navigated": "localhost:3000"}</text>
+
+    <text x="56" y="152" font-size="9" fill="#475569" font-family="'SF Mono', Menlo, monospace">$ curl -X POST .../screenshot</text>
+    <rect x="52" y="158" width="212" height="16" rx="3" fill="#0f1f35"/>
+    <text x="158" y="170" text-anchor="middle" font-size="9" fill="#22c55e" font-family="'SF Mono', Menlo, monospace">✓ {"saved": "/tmp/shot.png"}</text>
+
+    <text x="56" y="192" font-size="9" fill="#475569" font-family="'SF Mono', Menlo, monospace">$ curl .../console-errors</text>
+    <rect x="52" y="198" width="212" height="16" rx="3" fill="#0f1f35"/>
+    <text x="158" y="210" text-anchor="middle" font-size="9" fill="#22c55e" font-family="'SF Mono', Menlo, monospace">✓ {"errors": []}</text>
+
+    <!-- Success message -->
+    <rect x="52" y="228" width="212" height="40" rx="6" fill="#052e16" stroke="#16a34a40" stroke-width="1"/>
+    <text x="158" y="244" text-anchor="middle" font-size="10" fill="#22c55e">✓ All checks passed</text>
+    <text x="158" y="260" text-anchor="middle" font-size="10" fill="#475569">Loop closed automatically</text>
+    <!-- Active cursor -->
+    <rect x="56" y="284" width="7" height="13" rx="1" fill="#a78bfa" opacity="0.8"/>
+  </g>
+
+  <!-- ── Center: ClosedLoop bridge ── -->
+  <g transform="translate(324, 120)">
+    <!-- Bridge box -->
+    <rect x="0" y="0" width="132" height="162" rx="12" fill="#1e1b4b" stroke="#4c1d95" stroke-width="1.5" filter="url(#shadow2)"/>
+    <!-- Header -->
+    <rect x="0" y="0" width="132" height="38" rx="12" fill="#2d1f6e"/>
+    <rect x="0" y="26" width="132" height="12" fill="#2d1f6e"/>
+    <text x="66" y="18" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">ClosedLoop</text>
+    <text x="66" y="32" text-anchor="middle" font-size="8" fill="#a78bfa" letter-spacing="0.5">BRIDGE</text>
+
+    <!-- Green dot -->
+    <circle cx="30" cy="62" r="4" fill="#22c55e"/>
+    <circle cx="30" cy="62" r="7" fill="#22c55e" opacity="0.2"/>
+    <text x="44" y="66" font-size="9" fill="#94a3b8">Server connected</text>
+
+    <circle cx="30" cy="84" r="4" fill="#a78bfa"/>
+    <circle cx="30" cy="84" r="7" fill="#a78bfa" opacity="0.2"/>
+    <text x="44" y="88" font-size="9" fill="#94a3b8">Extension active</text>
+
+    <circle cx="30" cy="106" r="4" fill="#38bdf8"/>
+    <circle cx="30" cy="106" r="7" fill="#38bdf8" opacity="0.2"/>
+    <text x="44" y="110" font-size="9" fill="#94a3b8">Debugger attached</text>
+
+    <!-- Divider -->
+    <line x1="14" y1="124" x2="118" y2="124" stroke="#2d1f6e" stroke-width="1"/>
+
+    <!-- Port label -->
+    <text x="66" y="142" text-anchor="middle" font-size="9" fill="#475569" font-family="'SF Mono', Menlo, monospace">localhost:9009</text>
+    <rect x="28" y="148" width="76" height="6" rx="3" fill="url(#bridge)" opacity="0.5"/>
+  </g>
+
+  <!-- ── Right card: Browser with glow ring ── -->
+  <g filter="url(#shadow2)">
+    <!-- Glow ring effect around browser -->
+    <rect x="615" y="55" width="250" height="300" rx="14" fill="none" stroke="#7c3aed" stroke-width="3" opacity="0.9" filter="url(#purpleglow)"/>
+    <rect x="617" y="57" width="246" height="296" rx="13" fill="none" stroke="#a78bfa" stroke-width="1.5" opacity="0.6"/>
+
+    <rect x="620" y="60" width="240" height="290" rx="10" fill="url(#card2)" stroke="#2d1f6e" stroke-width="1"/>
+    <!-- Browser chrome -->
+    <rect x="620" y="60" width="240" height="32" rx="10" fill="#1e293b"/>
+    <rect x="620" y="78" width="240" height="14" fill="#1e293b"/>
+    <circle cx="640" cy="76" r="5" fill="#ef4444" opacity="0.7"/>
+    <circle cx="656" cy="76" r="5" fill="#f59e0b" opacity="0.7"/>
+    <circle cx="672" cy="76" r="5" fill="#22c55e" opacity="0.7"/>
+    <rect x="686" y="67" width="164" height="18" rx="4" fill="#0f172a"/>
+    <text x="768" y="80" text-anchor="middle" font-size="9" fill="#475569">localhost:3000</text>
+
+    <!-- AI banner at top of page -->
+    <rect x="676" y="102" width="168" height="18" rx="9" fill="#7c3aed" opacity="0.9"/>
+    <text x="760" y="115" text-anchor="middle" font-size="8" fill="#fff" font-weight="600">An AI agent is controlling this tab</text>
+
+    <!-- Working page content -->
+    <rect x="632" y="128" width="216" height="80" rx="4" fill="#0f172a"/>
+    <rect x="644" y="138" width="160" height="10" rx="2" fill="#1e293b"/>
+    <rect x="644" y="154" width="192" height="8" rx="2" fill="#1e3a5f" opacity="0.7"/>
+    <rect x="644" y="168" width="140" height="8" rx="2" fill="#1e3a5f" opacity="0.5"/>
+    <rect x="644" y="182" width="170" height="8" rx="2" fill="#1e3a5f" opacity="0.4"/>
+
+    <!-- Working ✓ -->
+    <text x="740" y="228" text-anchor="middle" font-size="28" fill="#1e293b">✅</text>
+    <text x="740" y="254" text-anchor="middle" font-size="11" fill="#22c55e">Page loaded correctly</text>
+
+    <!-- Console clean -->
+    <rect x="632" y="270" width="216" height="50" rx="4" fill="#0a0f1a"/>
+    <text x="644" y="286" font-size="9" fill="#475569" font-family="'SF Mono', Menlo, monospace">Console</text>
+    <text x="644" y="302" font-size="9" fill="#22c55e" font-family="'SF Mono', Menlo, monospace">✓ No errors detected</text>
+    <text x="644" y="314" font-size="9" fill="#22c55e" font-family="'SF Mono', Menlo, monospace">✓ All requests 200 OK</text>
+  </g>
+
+  <!-- ── Arrows (bidirectional, purple, solid) ── -->
+  <!-- Agent → Bridge -->
+  <line x1="282" y1="200" x2="320" y2="200" stroke="#7c3aed" stroke-width="2"/>
+  <polygon points="317,195 327,200 317,205" fill="#7c3aed"/>
+
+  <!-- Bridge → Agent -->
+  <line x1="320" y1="210" x2="282" y2="210" stroke="#a78bfa" stroke-width="1.5" opacity="0.6"/>
+  <polygon points="285,205 275,210 285,215" fill="#a78bfa" opacity="0.6"/>
+
+  <!-- Bridge → Browser -->
+  <line x1="458" y1="200" x2="613" y2="200" stroke="#7c3aed" stroke-width="2"/>
+  <polygon points="610,195 620,200 610,205" fill="#7c3aed"/>
+
+  <!-- Browser → Bridge -->
+  <line x1="613" y1="212" x2="458" y2="212" stroke="#a78bfa" stroke-width="1.5" opacity="0.6"/>
+  <polygon points="461,207 451,212 461,217" fill="#a78bfa" opacity="0.6"/>
+
+  <!-- ── Person (happy, off to the side) ── -->
+  <g transform="translate(390, 290)">
+    <text x="0" y="0" font-size="24">☕</text>
+    <text x="32" y="-4" font-size="11" fill="#475569">You're free.</text>
+    <text x="32" y="12" font-size="10" fill="#334155">Go get that coffee.</text>
+  </g>
+
+  <!-- ── Bottom caption ── -->
+  <text x="450" y="386" text-anchor="middle" font-size="13" fill="#a78bfa">The loop is closed. Agent navigates, screenshots, clicks, reads errors — all on its own.</text>
+  <line x1="180" y1="396" x2="720" y2="396" stroke="#1e293b" stroke-width="1"/>
+
+  <text x="160" y="380" text-anchor="middle" font-size="10" fill="#4c1d95" letter-spacing="0.5">AI AGENT</text>
+  <text x="390" y="380" text-anchor="middle" font-size="10" fill="#7c3aed" letter-spacing="0.5">CLOSELOOP BRIDGE</text>
+  <text x="740" y="380" text-anchor="middle" font-size="10" fill="#4c1d95" letter-spacing="0.5">REAL BROWSER</text>
+</svg>

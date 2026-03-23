@@ -5,41 +5,44 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SERVER_PATH="$SCRIPT_DIR/mcp-server/server.js"
 
 echo ""
-echo "CloseLoop setup"
-echo "==============="
+echo "ClosedLoop setup"
+echo "================"
 echo ""
 
-# 1. Install deps
-echo "Installing MCP server dependencies..."
+# Install deps
+echo "Installing server dependencies..."
 cd "$SCRIPT_DIR/mcp-server" && npm install --silent
 echo "Done."
 echo ""
 
-# 2. Print Claude Code MCP config
-echo "Add this to your Claude Code MCP config:"
-echo "  claude mcp add closeloop node -- \"$SERVER_PATH\""
+echo "┌─────────────────────────────────────────────────────────┐"
+echo "│  Two steps to get started:                              │"
+echo "└─────────────────────────────────────────────────────────┘"
 echo ""
-echo "Or manually add to ~/.claude/settings.json under mcpServers:"
+echo "1. Load the Chrome extension"
+echo "   → Open Chrome → chrome://extensions"
+echo "   → Enable Developer mode (top right toggle)"
+echo "   → Click 'Load unpacked'"
+echo "   → Select: $SCRIPT_DIR/extension"
 echo ""
-cat <<JSON
-  "closeloop": {
-    "command": "node",
-    "args": ["$SERVER_PATH"]
-  }
-JSON
-
+echo "2. Start the local server"
+echo "   → node $SERVER_PATH"
 echo ""
-echo "3. Load the Chrome extension:"
-echo "   - Open Chrome → chrome://extensions"
-echo "   - Enable Developer mode (top right)"
-echo "   - Click 'Load unpacked'"
-echo "   - Select: $SCRIPT_DIR/extension"
+echo "That's it. The extension popup turns green when connected."
+echo "Click 'Copy instructions for your AI' and paste into Claude Code."
 echo ""
-echo "4. Start using it in Claude Code:"
-echo "   - The extension popup shows 'Connected' when the MCP server is running"
-echo "   - Ask Claude Code to use the closeloop tools to inspect/control your browser"
+echo "────────────────────────────────────────────────────────────"
+echo "Demo: open the broken calculator in Chrome to try it:"
+echo "  file://$SCRIPT_DIR/demo/calculator/index.html"
+echo "────────────────────────────────────────────────────────────"
 echo ""
-echo "Available tools: get_page_context, take_screenshot, click_element,"
-echo "                 type_text, navigate_to, attach_debugger,"
-echo "                 get_console_errors, get_network_errors"
+echo "Server endpoints (Claude Code calls these via curl Bash tool):"
+echo "  GET  http://localhost:9009/context"
+echo "  POST http://localhost:9009/screenshot   → saves to /tmp/closedloop-screenshot.png"
+echo "  POST http://localhost:9009/click        body: {\"selector\":\"...\"}"
+echo "  POST http://localhost:9009/type         body: {\"selector\":\"...\",\"text\":\"...\"}"
+echo "  POST http://localhost:9009/navigate     body: {\"url\":\"...\"}"
+echo "  POST http://localhost:9009/attach-debugger"
+echo "  GET  http://localhost:9009/console-errors"
+echo "  GET  http://localhost:9009/network-errors"
 echo ""

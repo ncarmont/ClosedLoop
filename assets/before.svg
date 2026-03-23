@@ -1,0 +1,110 @@
+<svg width="900" height="420" viewBox="0 0 900 420" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f172a"/>
+      <stop offset="100%" style="stop-color:#0d1526"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e293b"/>
+      <stop offset="100%" style="stop-color:#172031"/>
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="900" height="420" fill="url(#bg)"/>
+
+  <!-- Label -->
+  <rect x="20" y="16" width="78" height="22" rx="4" fill="#1e293b"/>
+  <text x="59" y="31" text-anchor="middle" font-size="11" font-weight="600" fill="#ef4444" letter-spacing="0.8">BEFORE</text>
+
+  <!-- ── Left card: Claude Code terminal ── -->
+  <g filter="url(#shadow)">
+    <rect x="40" y="60" width="240" height="290" rx="10" fill="url(#card)" stroke="#1e3a5f" stroke-width="1"/>
+    <!-- Terminal bar -->
+    <rect x="40" y="60" width="240" height="32" rx="10" fill="#1e293b"/>
+    <rect x="40" y="78" width="240" height="14" fill="#1e293b"/>
+    <circle cx="60" cy="76" r="5" fill="#ef4444" opacity="0.7"/>
+    <circle cx="76" cy="76" r="5" fill="#f59e0b" opacity="0.7"/>
+    <circle cx="92" cy="76" r="5" fill="#22c55e" opacity="0.7"/>
+    <text x="156" y="80" text-anchor="middle" font-size="11" fill="#475569">claude code</text>
+    <!-- Code lines -->
+    <text x="56" y="114" font-size="10" fill="#7dd3fc" font-family="'SF Mono', Menlo, monospace">const result = await</text>
+    <text x="56" y="130" font-size="10" fill="#7dd3fc" font-family="'SF Mono', Menlo, monospace">  fetch('/api/data');</text>
+    <text x="56" y="152" font-size="10" fill="#94a3b8" font-family="'SF Mono', Menlo, monospace">// Did it work? 🤷</text>
+    <text x="56" y="174" font-size="10" fill="#94a3b8" font-family="'SF Mono', Menlo, monospace">// I can't see the</text>
+    <text x="56" y="190" font-size="10" fill="#94a3b8" font-family="'SF Mono', Menlo, monospace">// browser from here...</text>
+    <!-- Waiting message -->
+    <rect x="52" y="210" width="212" height="48" rx="6" fill="#0f172a" stroke="#1e3a5f" stroke-width="1"/>
+    <text x="158" y="230" text-anchor="middle" font-size="10" fill="#f59e0b">⏳ Waiting for you...</text>
+    <text x="158" y="248" text-anchor="middle" font-size="10" fill="#475569">Please check the browser</text>
+    <!-- Cursor blinking -->
+    <rect x="56" y="272" width="7" height="13" rx="1" fill="#7dd3fc" opacity="0.8"/>
+  </g>
+
+  <!-- ── Middle: frustrated person ── -->
+  <g transform="translate(330, 140)">
+    <!-- Person body (simple) -->
+    <circle cx="60" cy="28" r="22" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+    <!-- Face -->
+    <text x="60" y="36" text-anchor="middle" font-size="26">😤</text>
+    <!-- Speech bubbles -->
+    <rect x="-30" y="72" width="180" height="34" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+    <text x="60" y="87" text-anchor="middle" font-size="10" fill="#f87171">"Did it work? Let me</text>
+    <text x="60" y="100" text-anchor="middle" font-size="10" fill="#f87171">check the browser…"</text>
+    <!-- Down arrow from person -->
+    <text x="60" y="130" text-anchor="middle" font-size="18" fill="#475569">↓</text>
+    <rect x="-20" y="144" width="160" height="28" rx="6" fill="#0f172a" stroke="#ef444440" stroke-width="1"/>
+    <text x="60" y="163" text-anchor="middle" font-size="10" fill="#ef4444">Copy-paste error back</text>
+  </g>
+
+  <!-- ── Right card: Browser with error ── -->
+  <g filter="url(#shadow)">
+    <rect x="620" y="60" width="240" height="290" rx="10" fill="url(#card)" stroke="#1e3a5f" stroke-width="1"/>
+    <!-- Browser chrome -->
+    <rect x="620" y="60" width="240" height="32" rx="10" fill="#1e293b"/>
+    <rect x="620" y="78" width="240" height="14" fill="#1e293b"/>
+    <circle cx="640" cy="76" r="5" fill="#ef4444" opacity="0.7"/>
+    <circle cx="656" cy="76" r="5" fill="#f59e0b" opacity="0.7"/>
+    <circle cx="672" cy="76" r="5" fill="#22c55e" opacity="0.7"/>
+    <!-- URL bar -->
+    <rect x="686" y="67" width="164" height="18" rx="4" fill="#0f172a"/>
+    <text x="768" y="80" text-anchor="middle" font-size="9" fill="#475569">localhost:3000</text>
+    <!-- Broken page -->
+    <rect x="632" y="104" width="216" height="120" rx="4" fill="#0f172a"/>
+    <text x="740" y="150" text-anchor="middle" font-size="28" fill="#1e293b">💥</text>
+    <text x="740" y="178" text-anchor="middle" font-size="11" fill="#ef4444">Something went wrong</text>
+    <text x="740" y="196" text-anchor="middle" font-size="10" fill="#475569">Cannot read property</text>
+    <text x="740" y="210" text-anchor="middle" font-size="10" fill="#475569">'map' of undefined</text>
+    <!-- Console errors -->
+    <rect x="632" y="234" width="216" height="80" rx="4" fill="#0a0f1a"/>
+    <text x="644" y="250" font-size="9" fill="#475569" font-family="'SF Mono', Menlo, monospace">Console</text>
+    <text x="644" y="266" font-size="9" fill="#ef4444" font-family="'SF Mono', Menlo, monospace">✕ TypeError: map of undef</text>
+    <text x="644" y="281" font-size="9" fill="#ef4444" font-family="'SF Mono', Menlo, monospace">✕ 404 /api/users</text>
+    <text x="644" y="296" font-size="9" fill="#f59e0b" font-family="'SF Mono', Menlo, monospace">⚠ Warning: key prop</text>
+  </g>
+
+  <!-- ── Arrows ── -->
+  <!-- Agent → Person (question mark) -->
+  <line x1="282" y1="200" x2="328" y2="195" stroke="#475569" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <polygon points="325,190 335,195 325,200" fill="#475569"/>
+
+  <!-- Person → Browser (manual copy) -->
+  <line x1="452" y1="195" x2="614" y2="200" stroke="#475569" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <polygon points="611,195 621,200 611,205" fill="#475569"/>
+
+  <!-- Browser → Person (errors) -->
+  <path d="M 620 240 Q 540 290 460 240" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4,3" fill="none" opacity="0.6"/>
+  <polygon points="463,235 457,243 470,244" fill="#ef4444" opacity="0.6"/>
+
+  <!-- ── Bottom caption ── -->
+  <text x="450" y="386" text-anchor="middle" font-size="13" fill="#475569">You are the loop. Every check is manual. Every error needs you in the middle.</text>
+  <line x1="180" y1="396" x2="720" y2="396" stroke="#1e293b" stroke-width="1"/>
+
+  <!-- Column labels -->
+  <text x="160" y="380" text-anchor="middle" font-size="10" fill="#334155" letter-spacing="0.5">AI AGENT</text>
+  <text x="460" y="380" text-anchor="middle" font-size="10" fill="#334155" letter-spacing="0.5">YOU (THE BOTTLENECK)</text>
+  <text x="740" y="380" text-anchor="middle" font-size="10" fill="#334155" letter-spacing="0.5">REAL BROWSER</text>
+</svg>

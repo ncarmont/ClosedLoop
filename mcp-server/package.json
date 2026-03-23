@@ -1,14 +1,14 @@
 {
-  "name": "closeloop-mcp",
+  "name": "closedloop-server",
   "version": "0.1.0",
-  "description": "CloseLoop MCP server — give your coding agent your real browser",
+  "description": "ClosedLoop local HTTP server — gives AI coding agents direct access to your real Chrome browser",
   "type": "module",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.10.2",
+    "express": "^4.19.2",
     "ws": "^8.18.0"
   }
 }

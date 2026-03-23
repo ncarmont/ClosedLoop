@@ -1,25 +1,41 @@
-import { Server } from '@modelcontextprotocol/sdk/server/index.js';
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import {
-  CallToolRequestSchema,
-  ListToolsRequestSchema,
-} from '@modelcontextprotocol/sdk/types.js';
+import express from 'express';
+import { createServer } from 'http';
 import { WebSocketServer } from 'ws';
+import { writeFileSync } from 'fs';
+import { tmpdir } from 'os';
+import { join } from 'path';
 
-const WS_PORT = 9009;
+const PORT = 9009;
 
-// ── WebSocket bridge (extension connects here) ────────────────────────────────
+// ── HTTP server ───────────────────────────────────────────────────────────────
 
-const wss = new WebSocketServer({ port: WS_PORT, host: 'localhost' });
+const app = express();
+app.use(express.json());
+
+// Allow requests from the Chrome extension popup (chrome-extension://* origin)
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') return res.sendStatus(204);
+  next();
+});
+
+const httpServer = createServer(app);
+
+// ── WebSocket bridge (Chrome extension connects here) ─────────────────────────
+
+const wss = new WebSocketServer({ server: httpServer });
 let extensionSocket = null;
 const pending = new Map();
 let nextId = 1;
+let lastAgentCall = null; // track when the AI agent last used the API
 
-wss.on('connection', (socket) => {
-  extensionSocket = socket;
-  process.stderr.write('[ClosedLoop] Chrome extension connected\n');
+wss.on('connection', (ws) => {
+  extensionSocket = ws;
+  process.stdout.write('[ClosedLoop] Chrome extension connected\n');
 
-  socket.on('message', (data) => {
+  ws.on('message', (data) => {
     try {
       const msg = JSON.parse(data);
       const resolve = pending.get(msg.id);
@@ -30,17 +46,17 @@ wss.on('connection', (socket) => {
     } catch {}
   });
 
-  socket.on('close', () => {
+  ws.on('close', () => {
     extensionSocket = null;
-    process.stderr.write('[ClosedLoop] Chrome extension disconnected\n');
+    process.stdout.write('[ClosedLoop] Chrome extension disconnected\n');
   });
 });
 
-async function send(command, params = {}) {
-  if (!extensionSocket || extensionSocket.readyState !== 1 /* OPEN */) {
+async function sendToExtension(command, params = {}) {
+  if (!extensionSocket || extensionSocket.readyState !== 1) {
     throw new Error(
-      'ClosedLoop Chrome extension is not connected. ' +
-      'Make sure the extension is installed and the popup shows "Connected".'
+      'Chrome extension not connected. ' +
+      'Make sure ClosedLoop is installed and the popup shows a green dot.'
     );
   }
   const id = nextId++;
@@ -57,130 +73,145 @@ async function send(command, params = {}) {
   });
 }
 
-// ── Tool definitions ──────────────────────────────────────────────────────────
+function trackAgentCall(req, res, next) {
+  lastAgentCall = { endpoint: req.method + ' ' + req.path, at: Date.now() };
+  next();
+}
 
-const TOOLS = [
-  {
-    name: 'get_page_context',
-    description:
-      'Get the URL, title, visible body text (up to 3000 chars), and a list of ' +
-      'interactive elements (buttons, inputs, links) with their CSS selectors. ' +
-      'Always call this first to understand what is on the page.',
-    inputSchema: { type: 'object', properties: {} },
-  },
-  {
-    name: 'take_screenshot',
-    description:
-      'Capture a screenshot of the current visible tab as a PNG image. ' +
-      'Use this to visually verify layouts, check for rendering bugs, or confirm a fix.',
-    inputSchema: { type: 'object', properties: {} },
-  },
-  {
-    name: 'click_element',
-    description: 'Click an element in the current tab using a CSS selector.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        selector: {
-          type: 'string',
-          description: 'CSS selector for the element to click (e.g. "#submit-btn", "[data-testid=\\"save\\"]")',
-        },
-      },
-      required: ['selector'],
-    },
-  },
-  {
-    name: 'type_text',
-    description: 'Focus an input/textarea and type text into it.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        selector: { type: 'string', description: 'CSS selector for the input element' },
-        text: { type: 'string', description: 'Text to type' },
-        clear: { type: 'boolean', description: 'Clear the field before typing (default: true)' },
-      },
-      required: ['selector', 'text'],
-    },
-  },
-  {
-    name: 'navigate_to',
-    description: 'Navigate the current tab to a URL and wait for the page to finish loading.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        url: { type: 'string', description: 'Absolute URL to navigate to' },
-      },
-      required: ['url'],
-    },
-  },
-  {
-    name: 'attach_debugger',
-    description:
-      'Attach the Chrome debugger to the current tab to start capturing console errors ' +
-      'and network failures. Call this before get_console_errors or get_network_errors. ' +
-      'Resets the error buffers each time it is called.',
-    inputSchema: { type: 'object', properties: {} },
-  },
-  {
-    name: 'get_console_errors',
-    description:
-      'Return all console errors, warnings, and uncaught exceptions captured since ' +
-      'attach_debugger was last called. Returns and clears the buffer.',
-    inputSchema: { type: 'object', properties: {} },
-  },
-  {
-    name: 'get_network_errors',
-    description:
-      'Return all HTTP 4xx/5xx responses and failed network requests captured since ' +
-      'attach_debugger was last called. Returns and clears the buffer.',
-    inputSchema: { type: 'object', properties: {} },
-  },
-];
+// ── Routes ────────────────────────────────────────────────────────────────────
 
-// ── MCP server ────────────────────────────────────────────────────────────────
-
-const server = new Server(
-  { name: 'closedloop', version: '0.1.0' },
-  { capabilities: { tools: {} } }
-);
-
-server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: TOOLS }));
-
-server.setRequestHandler(CallToolRequestSchema, async (request) => {
-  const { name, arguments: args } = request.params;
-
-  const validTools = new Set(TOOLS.map(t => t.name));
-  if (!validTools.has(name)) {
-    throw new Error(`Unknown tool: ${name}`);
-  }
-
-  const result = await send(name, args || {});
-
-  if (name === 'take_screenshot' && result?.screenshot) {
-    const base64 = result.screenshot.replace(/^data:image\/\w+;base64,/, '');
-    return {
-      content: [
-        { type: 'image', data: base64, mimeType: 'image/png' },
-        { type: 'text', text: `URL: ${result.url}\nTitle: ${result.title}` },
-      ],
-    };
-  }
-
-  if (result?.error) {
-    return {
-      content: [{ type: 'text', text: `Error: ${result.error}` }],
-      isError: true,
-    };
-  }
-
-  return {
-    content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
-  };
+// Status — polled by the extension popup to show connection + agent activity
+app.get('/status', (req, res) => {
+  res.json({
+    extensionConnected: !!extensionSocket && extensionSocket.readyState === 1,
+    lastAgentCall,
+  });
 });
 
-const transport = new StdioServerTransport();
-await server.connect(transport);
-process.stderr.write(
-  `[ClosedLoop] MCP server running (stdio). ` +
-  `Waiting for Chrome extension on ws://localhost:${WS_PORT}\n`
-);
+// Get page context (URL, title, body text, interactive elements + selectors)
+app.get('/context', trackAgentCall, async (req, res) => {
+  try {
+    res.json(await sendToExtension('get_page_context'));
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Screenshot — saves PNG to /tmp/closedloop-screenshot.png, returns the path
+// Use the Read tool to view the image after calling this.
+app.post('/screenshot', trackAgentCall, async (req, res) => {
+  try {
+    const result = await sendToExtension('take_screenshot');
+    const base64 = result.screenshot.replace(/^data:image\/\w+;base64,/, '');
+    const path = join(tmpdir(), 'closedloop-screenshot.png');
+    writeFileSync(path, Buffer.from(base64, 'base64'));
+    res.json({ saved: path, url: result.url, title: result.title });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Click an element by CSS selector
+// Body: { "selector": "#my-button" }
+app.post('/click', trackAgentCall, async (req, res) => {
+  try {
+    res.json(await sendToExtension('click_element', req.body));
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Type text into an input
+// Body: { "selector": "#email", "text": "hello@example.com", "clear": true }
+app.post('/type', trackAgentCall, async (req, res) => {
+  try {
+    res.json(await sendToExtension('type_text', req.body));
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Navigate the current tab to a URL
+// Body: { "url": "http://localhost:3000/dashboard" }
+app.post('/navigate', trackAgentCall, async (req, res) => {
+  try {
+    res.json(await sendToExtension('navigate_to', req.body));
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Attach Chrome debugger — call before getting console/network errors
+app.post('/attach-debugger', trackAgentCall, async (req, res) => {
+  try {
+    res.json(await sendToExtension('attach_debugger'));
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Get console errors captured since attach-debugger was last called
+app.get('/console-errors', trackAgentCall, async (req, res) => {
+  try {
+    res.json(await sendToExtension('get_console_errors'));
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Get network errors (4xx/5xx, failed requests) since attach-debugger
+app.get('/network-errors', trackAgentCall, async (req, res) => {
+  try {
+    res.json(await sendToExtension('get_network_errors'));
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Request user approval before proceeding with a risky or uncertain action
+// Body: { "action": "Delete all records in the users table", "reason": "This is irreversible" }
+// Returns: { "approved": true } or { "approved": false }
+// The agent MUST check the response — if approved is false, abort the action entirely.
+app.post('/request-approval', trackAgentCall, async (req, res) => {
+  try {
+    res.json(await sendToExtension('request_approval', req.body));
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Toggle mobile emulation (Chrome DevTools responsive design mode)
+// Body: { "enable": true }  — omit to toggle, pass false to restore desktop
+// Emulates iPhone 15 Pro (393×852, DPR 3) with mobile user-agent
+app.post('/toggle-mobile', trackAgentCall, async (req, res) => {
+  try {
+    res.json(await sendToExtension('toggle_mobile', req.body));
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.post('/reset-history', async (req, res) => {
+  try {
+    res.json(await sendToExtension('clear_history'));
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ── Start ─────────────────────────────────────────────────────────────────────
+
+httpServer.listen(PORT, 'localhost', () => {
+  process.stdout.write(`\n[ClosedLoop] Server running at http://localhost:${PORT}\n`);
+  process.stdout.write('[ClosedLoop] Waiting for Chrome extension to connect...\n\n');
+  process.stdout.write('AI agent endpoints:\n');
+  process.stdout.write(`  GET  http://localhost:${PORT}/context\n`);
+  process.stdout.write(`  POST http://localhost:${PORT}/screenshot   (saves to /tmp/closedloop-screenshot.png)\n`);
+  process.stdout.write(`  POST http://localhost:${PORT}/click        body: {"selector":"..."}\n`);
+  process.stdout.write(`  POST http://localhost:${PORT}/type         body: {"selector":"...","text":"..."}\n`);
+  process.stdout.write(`  POST http://localhost:${PORT}/navigate     body: {"url":"..."}\n`);
+  process.stdout.write(`  POST http://localhost:${PORT}/attach-debugger\n`);
+  process.stdout.write(`  GET  http://localhost:${PORT}/console-errors\n`);
+  process.stdout.write(`  GET  http://localhost:${PORT}/network-errors\n`);
+  process.stdout.write(`  POST http://localhost:${PORT}/toggle-mobile    body: {"enable":true|false}\n\n`);
+});

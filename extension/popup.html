@@ -5,114 +5,122 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      width: 300px;
+      width: 320px;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       padding: 16px;
       background: #0f172a;
       color: #f1f5f9;
     }
+
+    /* ── Header ── */
     .header {
       display: flex;
       align-items: center;
       gap: 8px;
       margin-bottom: 14px;
     }
-    .logo {
-      font-size: 18px;
-      font-weight: 700;
-      color: #fff;
-      letter-spacing: -0.5px;
-    }
+    .logo { font-size: 18px; font-weight: 700; color: #fff; letter-spacing: -0.5px; }
     .badge {
-      font-size: 9px;
-      font-weight: 600;
-      background: #7c3aed;
-      color: #fff;
-      padding: 2px 6px;
-      border-radius: 3px;
-      letter-spacing: 0.5px;
+      font-size: 9px; font-weight: 600;
+      background: #7c3aed; color: #fff;
+      padding: 2px 6px; border-radius: 3px; letter-spacing: 0.5px;
     }
-    .status-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
+
+    /* ── Status cards ── */
+    .status-card {
+      display: flex; align-items: center; gap: 10px;
       padding: 10px 12px;
       background: #1e293b;
       border-radius: 8px;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
+      border: 1px solid transparent;
     }
-    .dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-    .dot.on  { background: #22c55e; box-shadow: 0 0 6px #22c55e80; }
-    .dot.off { background: #ef4444; }
-    .status-label { font-size: 13px; font-weight: 500; }
+    .status-card.active { border-color: #22c55e30; }
+    .status-card.agent-active { border-color: #7c3aed40; background: #1e1b4b; }
 
-    /* Copy button — the main CTA */
+    .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .dot.on    { background: #22c55e; box-shadow: 0 0 6px #22c55e80; }
+    .dot.off   { background: #ef4444; }
+    .dot.agent { background: #a78bfa; box-shadow: 0 0 6px #a78bfa80; }
+    .dot.pulse {
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .status-text { flex: 1; }
+    .status-label { font-size: 13px; font-weight: 500; }
+    .status-sub   { font-size: 10px; color: #64748b; margin-top: 1px; }
+
+    /* ── Copy button ── */
     .copy-btn {
-      width: 100%;
-      padding: 11px 14px;
-      background: #6d28d9;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
+      width: 100%; padding: 11px 14px;
+      background: #6d28d9; color: #fff;
+      border: none; border-radius: 8px;
+      font-size: 13px; font-weight: 600;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      margin-bottom: 12px;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      margin: 12px 0 4px;
       transition: background 0.15s;
     }
     .copy-btn:hover  { background: #7c3aed; }
-    .copy-btn:active { background: #5b21b6; }
     .copy-btn.copied { background: #16a34a; }
-    .copy-btn svg { flex-shrink: 0; }
-    .copy-hint {
-      font-size: 10px;
-      color: #475569;
-      text-align: center;
-      margin-top: -8px;
-      margin-bottom: 12px;
-    }
+    .copy-hint { font-size: 10px; color: #475569; text-align: center; margin-bottom: 12px; }
 
-    .section { margin-bottom: 12px; }
+    /* ── Sections ── */
+    .section { margin-bottom: 10px; }
     .section-title {
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 0.8px;
-      color: #475569;
-      text-transform: uppercase;
-      margin-bottom: 6px;
-    }
-    .code-block {
-      background: #1e293b;
-      border-radius: 6px;
-      padding: 8px 10px;
-      font-size: 10px;
-      font-family: "SF Mono", Menlo, monospace;
-      color: #7dd3fc;
-      line-height: 1.6;
-      word-break: break-all;
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 0.8px; color: #475569;
+      text-transform: uppercase; margin-bottom: 5px;
     }
     .tab-info {
-      background: #1e293b;
-      border-radius: 6px;
-      padding: 8px 10px;
-      font-size: 11px;
-      color: #94a3b8;
-      line-height: 1.5;
+      background: #1e293b; border-radius: 6px;
+      padding: 8px 10px; font-size: 11px; color: #94a3b8; line-height: 1.5;
     }
-    .tab-url {
-      color: #64748b;
-      font-size: 10px;
-      margin-top: 2px;
-      word-break: break-all;
+    .tab-url { color: #64748b; font-size: 10px; margin-top: 2px; word-break: break-all; }
+    .code-block {
+      background: #1e293b; border-radius: 6px;
+      padding: 8px 10px; font-size: 10px;
+      font-family: "SF Mono", Menlo, monospace;
+      color: #7dd3fc; line-height: 1.6; word-break: break-all;
+    }
+
+    /* ── Screenshot preview ── */
+    .screenshot-wrap {
+      position: relative;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid #1e293b;
+      background: #0a0f1e;
+    }
+    .screenshot-wrap img {
+      width: 100%;
+      display: block;
+      border-radius: 6px;
+    }
+    .screenshot-time {
+      font-size: 9px;
+      color: #475569;
+      margin-top: 4px;
+      text-align: right;
+    }
+
+    /* ── Start command ── */
+    .start-box {
+      background: #0f1f35;
+      border: 1px solid #1e3a5f;
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+    }
+    .start-label { font-size: 10px; color: #475569; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 5px; }
+    .start-cmd {
+      font-family: "SF Mono", Menlo, monospace;
+      font-size: 11px;
+      color: #7dd3fc;
     }
   </style>
 </head>
@@ -122,11 +130,31 @@
     <span class="badge">BETA</span>
   </div>
 
-  <div class="status-row">
-    <div class="dot" id="dot"></div>
-    <span class="status-label" id="status-text">Checking...</span>
+  <!-- Server connection status -->
+  <div class="status-card" id="server-card">
+    <div class="dot" id="server-dot"></div>
+    <div class="status-text">
+      <div class="status-label" id="server-label">Checking server...</div>
+      <div class="status-sub" id="server-sub">http://localhost:9009</div>
+    </div>
   </div>
 
+  <!-- AI agent activity status -->
+  <div class="status-card" id="agent-card">
+    <div class="dot" id="agent-dot"></div>
+    <div class="status-text">
+      <div class="status-label" id="agent-label">No AI agent connected</div>
+      <div class="status-sub" id="agent-sub">Waiting for API calls...</div>
+    </div>
+  </div>
+
+  <!-- Start server hint (shown when server is not running) -->
+  <div class="start-box" id="start-box" style="display:none">
+    <div class="start-label">Start the server</div>
+    <div class="start-cmd" id="start-cmd">node /path/to/closedloop/mcp-server/server.js</div>
+  </div>
+
+  <!-- Copy instructions button -->
   <button class="copy-btn" id="copy-btn">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
       <rect x="9" y="9" width="13" height="13" rx="2"/>
@@ -134,8 +162,9 @@
     </svg>
     <span id="copy-label">Copy instructions for your AI</span>
   </button>
-  <div class="copy-hint">Paste into Claude Code / Cursor to connect</div>
+  <div class="copy-hint">Get more coffees and stop babysitting — close the loop.</div>
 
+  <!-- Active tab -->
   <div class="section">
     <div class="section-title">Active Tab</div>
     <div class="tab-info">
@@ -144,9 +173,13 @@
     </div>
   </div>
 
-  <div class="section">
-    <div class="section-title">MCP Server Config</div>
-    <div class="code-block" id="config-path">Loading...</div>
+  <!-- Last screenshot -->
+  <div class="section" id="screenshot-section" style="display:none">
+    <div class="section-title">Last Screenshot</div>
+    <div class="screenshot-wrap">
+      <img id="screenshot-preview" alt="last screenshot" />
+    </div>
+    <div class="screenshot-time" id="screenshot-time"></div>
   </div>
 
   <script src="popup.js"></script>
