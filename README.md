@@ -2,7 +2,8 @@
 
 # ☕ CloseLoop
 
-### Your AI agent is staring at a blank browser. You shouldn't have to be.
+### Your AI writes the code. You open the browser, check if it worked, copy the error, paste it back, repeat.
+### CloseLoop does that part. You just drink the coffee.
 
 <br/>
 
