@@ -43,27 +43,28 @@ function showAgentRing(tabId) {
 
       const banner = document.createElement('div');
       banner.id = BANNER_ID;
-      banner.textContent = '✦ An AI agent is controlling this browser tab';
+      banner.textContent = '✦  An AI agent is controlling this browser tab  ✦';
       banner.style.cssText = `
-        position: fixed;
-        top: 14px;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 2147483647;
-        background: linear-gradient(90deg, #4c1d95, #7c3aed, #a78bfa, #c4b5fd, #a78bfa, #7c3aed, #4c1d95);
-        background-size: 300% 100%;
-        color: #fff;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        font-size: 12px;
-        font-weight: 600;
-        padding: 6px 18px;
-        border-radius: 999px;
-        pointer-events: none;
-        white-space: nowrap;
-        border: 1px solid rgba(196,181,253,0.35);
-        box-shadow: 0 2px 14px rgba(124,58,237,0.45);
-        animation: __cl_banner_sweep__ 4s linear infinite, __cl_banner_in__ 0.25s ease forwards;
-        transition: opacity 0.7s ease;
+        position: fixed !important;
+        top: 16px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        z-index: 2147483647 !important;
+        background: linear-gradient(90deg, #4c1d95, #7c3aed, #a78bfa, #c4b5fd, #a78bfa, #7c3aed, #4c1d95) !important;
+        background-size: 300% 100% !important;
+        color: #fff !important;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+        font-size: 13px !important;
+        font-weight: 700 !important;
+        padding: 8px 22px !important;
+        border-radius: 999px !important;
+        pointer-events: none !important;
+        white-space: nowrap !important;
+        border: 1.5px solid rgba(196,181,253,0.5) !important;
+        box-shadow: 0 4px 24px rgba(124,58,237,0.6), 0 1px 4px rgba(0,0,0,0.4) !important;
+        animation: __cl_banner_sweep__ 4s linear infinite, __cl_banner_in__ 0.25s ease forwards !important;
+        transition: opacity 0.7s ease !important;
+        letter-spacing: 0.01em !important;
       `;
 
       document.body.appendChild(banner);
@@ -74,7 +75,7 @@ function showAgentRing(tabId) {
           banner.remove();
           document.getElementById(STYLE_ID)?.remove();
         }, 700);
-      }, 9000);
+      }, 30000); // visible for 30s
     },
   }).catch(() => {});
 }
@@ -292,6 +293,13 @@ async function injectSidebar(tabId) {
         tab.textContent = 'CL';
         tab.title = 'Open ClosedLoop panel';
         document.body.appendChild(tab);
+
+        // Show debug banner immediately if debugger is already attached
+        chrome.storage.local.get('debuggerActive').then(d => {
+          if (d.debuggerActive) {
+            document.getElementById('__cl_debug_banner__')?.classList.add('__cl_on__');
+          }
+        }).catch(() => {});
 
         // ── Events ───────────────────────────────────────────────────────────
         document.getElementById('__cl_close__').addEventListener('click', () => {

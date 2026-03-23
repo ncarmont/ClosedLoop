@@ -27,6 +27,13 @@ It navigates. It clicks. It types. It screenshots. It reads console errors.
 
 ---
 
+<div align="center">
+<img src="assets/demo.gif" alt="CloseLoop demo — agent controlling the browser in real time" width="100%"/>
+<em>CloseLoop in action — element spotlight, banner pill, live side panel.</em>
+</div>
+
+---
+
 ## 😤 You know this loop
 
 Agent writes code → you open browser → nothing rendered → you copy the error → paste it back → agent fixes it → you check again → repeat × 12.
