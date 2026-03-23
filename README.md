@@ -1,83 +1,106 @@
-# CloseLoop
+# ClosedLoop
 
-**Give your coding agent your real browser.**
+**Stop babysitting your AI agent. Go get a coffee.**
 
-Stop babysitting your AI agent. CloseLoop closes the loop — your agent can see your actual browser, click around, take screenshots, and catch errors on its own. You grab a coffee; it gets the work done.
+ClosedLoop gives your coding agent your real, signed-in browser — so it can see what you see, click what you'd click, take screenshots, and catch its own errors. The loop is finally closed.
+
+---
+
+## The Problem
+
+Your agent writes code. Then it waits. For *you* to open the browser, check if it worked, copy-paste the error back, and tell it what went wrong. You're the loop. You're the bottleneck.
+
+## The Fix
+
+ClosedLoop connects Claude Code directly to your live Chrome tab. Now the agent:
+
+- Takes a screenshot to verify its own work
+- Reads the DOM to understand what rendered
+- Clicks, types, and navigates like a real user
+- Pulls console errors and failed network requests straight from the debugger
+
+You don't have to watch. It watches itself.
 
 ---
 
 ## Before vs After
 
-| Before CloseLoop | After CloseLoop |
+| Without ClosedLoop | With ClosedLoop |
 |---|---|
-| Agent codes a feature, you manually open the browser to check it | Agent opens the browser, verifies the result, fixes issues automatically |
-| "It works on my machine" — agent can't see what you see | Agent takes a screenshot of your real signed-in session |
-| You copy-paste console errors back to the agent | Agent captures console/network errors directly from the debugger |
-| Agent writes code blindly, you babysit every step | Agent sees → acts → verifies → ships |
+| Agent ships code, you open the browser to check | Agent opens the browser and checks itself |
+| You copy-paste console errors back to the agent | Agent reads errors directly from the debugger |
+| Agent asks "did it work?" after every change | Agent takes a screenshot and knows |
+| You babysit every step of the way | You go get a coffee |
 
 ---
 
 ## How It Works
 
-CloseLoop is two pieces that work together:
+Two pieces, one bridge:
 
-1. **Chrome Extension** — a Manifest V3 extension that runs in your browser and exposes your active tab over a local WebSocket
-2. **MCP Server** — a Node.js server that bridges the extension to Claude Code (or any MCP client) over stdio
+1. **Chrome Extension** — Manifest V3 extension that exposes your active tab over a secure local WebSocket
+2. **MCP Server** — Node.js server that connects to the extension and surfaces browser control as MCP tools for Claude Code
 
 ```
-Claude Code  ←→  MCP Server (stdio)  ←→  WebSocket (localhost:9009)  ←→  Chrome Extension  ←→  Your Browser
+Claude Code
+    ↕  stdio (MCP)
+MCP Server (Node.js)
+    ↕  WebSocket · localhost:9009
+Chrome Extension
+    ↕  Chrome APIs
+Your Real Browser
 ```
 
 ---
 
-## Tools Available to Claude
+## Tools Claude Gets
 
 | Tool | What it does |
 |---|---|
-| `screenshot` | Captures a screenshot of the active tab |
-| `get_dom` | Returns the full DOM/HTML of the page |
-| `click` | Clicks an element by CSS selector |
+| `screenshot` | Takes a screenshot of the active tab |
+| `get_dom` | Returns the full HTML of the current page |
+| `click` | Clicks any element by CSS selector |
 | `type` | Types text into a focused input |
-| `navigate` | Navigates to a URL |
-| `get_url` | Returns the current tab URL |
-| `get_console_errors` | Retrieves JS console errors via the debugger |
-| `get_network_errors` | Retrieves failed network requests via the debugger |
+| `navigate` | Navigates to any URL |
+| `get_url` | Returns the current tab's URL |
+| `get_console_errors` | Captures JS console errors via the Chrome debugger |
+| `get_network_errors` | Captures failed network requests via the Chrome debugger |
 
 ---
 
 ## Quick Start
 
-### 1. Install the MCP Server
+### 1. Clone and install
 
 ```bash
-git clone https://github.com/nickcarmont/closeloop.git
-cd closeloop
+git clone https://github.com/ncarmont/ClosedLoop.git
+cd ClosedLoop
 bash setup.sh
 ```
 
-### 2. Load the Chrome Extension
+### 2. Load the Chrome extension
 
-1. Open `chrome://extensions`
-2. Enable **Developer mode**
+1. Go to `chrome://extensions`
+2. Enable **Developer mode** (top right)
 3. Click **Load unpacked** → select the `extension/` folder
-4. Click the CloseLoop icon — it should show **Connected**
+4. Click the ClosedLoop icon in your toolbar — it should show **Connected**
 
-### 3. Add to Claude Code
+### 3. Wire up Claude Code
 
-Add this to your MCP config (`~/.claude/mcp_settings.json`):
+Add to your MCP config (`~/.claude/mcp_settings.json`):
 
 ```json
 {
   "mcpServers": {
     "closeloop": {
       "command": "node",
-      "args": ["/path/to/closeloop/mcp-server/server.js"]
+      "args": ["/path/to/ClosedLoop/mcp-server/server.js"]
     }
   }
 }
 ```
 
-Restart Claude Code. CloseLoop tools will appear automatically.
+Restart Claude Code. The browser tools appear automatically.
 
 ---
 
@@ -86,6 +109,12 @@ Restart Claude Code. CloseLoop tools will appear automatically.
 - Node.js 18+
 - Google Chrome
 - Claude Code (or any MCP-compatible agent)
+
+---
+
+## Security
+
+The WebSocket server binds to `localhost` only — nothing is exposed to the network. Your browser session never leaves your machine.
 
 ---
 
