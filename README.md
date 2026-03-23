@@ -2,6 +2,8 @@
 
 # ☕ ClosedLoop — Claude Code Skill & Chrome Extension
 
+#### Less browser screenshotting, more coffees
+
 <br/>
 
 😤 **Before:** You're a screenshotting intern for your own AI coding tool. Write code → open browser → copy error → paste back → repeat × 12.
