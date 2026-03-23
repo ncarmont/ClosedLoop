@@ -5,7 +5,7 @@
 
 <br/>
 
-😤 **Before:** Your AI writes the code. You open the browser, check if it worked, copy the error, paste it back, repeat.
+😤 **Before:** You're a screenshotting intern for your own AI coding tool. Write code → open browser → copy error → paste back → repeat × 12.
 
 ☕ **After:** This skill/extension gives your AI access to your browser so it can check for itself.
 
