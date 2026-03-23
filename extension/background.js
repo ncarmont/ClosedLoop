@@ -7,15 +7,74 @@ let debuggingTabId = null;
 let consoleErrors = [];
 let networkErrors = [];
 
-// ── Cleanup injector — removes any ring/overlay left by old extension versions ──
+// ── Agent banner pill ──────────────────────────────────────────────────────────
+//
+// Small pill at the top of the page — animated gradient, auto-fades after 9s.
+// Also purges any leftover full-page ring from old extension versions.
 
 function showAgentRing(tabId) {
-  // Intentionally only runs cleanup. No ring, no banner, nothing on the border.
   chrome.scripting.executeScript({
     target: { tabId },
     func: () => {
-      document.getElementById('__closeloop_ring__')?.remove();
-      document.getElementById('__closeloop_ring_style__')?.remove();
+      const BANNER_ID = '__closeloop_ring__';
+      const STYLE_ID  = '__closeloop_ring_style__';
+
+      // Remove any existing banner or old full-page ring overlay
+      const existing = document.getElementById(BANNER_ID);
+      if (existing) {
+        clearTimeout(existing.__cl_timer);
+        existing.remove();
+      }
+      document.getElementById(STYLE_ID)?.remove();
+
+      const style = document.createElement('style');
+      style.id = STYLE_ID;
+      style.textContent = `
+        @keyframes __cl_banner_sweep__ {
+          0%   { background-position: 0% 50%; }
+          100% { background-position: 300% 50%; }
+        }
+        @keyframes __cl_banner_in__ {
+          from { opacity: 0; transform: translateX(-50%) translateY(-6px) scale(0.96); }
+          to   { opacity: 1; transform: translateX(-50%) translateY(0)     scale(1); }
+        }
+      `;
+      document.head.appendChild(style);
+
+      const banner = document.createElement('div');
+      banner.id = BANNER_ID;
+      banner.textContent = '✦ An AI agent is controlling this browser tab';
+      banner.style.cssText = `
+        position: fixed;
+        top: 14px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 2147483647;
+        background: linear-gradient(90deg, #4c1d95, #7c3aed, #a78bfa, #c4b5fd, #a78bfa, #7c3aed, #4c1d95);
+        background-size: 300% 100%;
+        color: #fff;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 6px 18px;
+        border-radius: 999px;
+        pointer-events: none;
+        white-space: nowrap;
+        border: 1px solid rgba(196,181,253,0.35);
+        box-shadow: 0 2px 14px rgba(124,58,237,0.45);
+        animation: __cl_banner_sweep__ 4s linear infinite, __cl_banner_in__ 0.25s ease forwards;
+        transition: opacity 0.7s ease;
+      `;
+
+      document.body.appendChild(banner);
+
+      banner.__cl_timer = setTimeout(() => {
+        banner.style.opacity = '0';
+        setTimeout(() => {
+          banner.remove();
+          document.getElementById(STYLE_ID)?.remove();
+        }, 700);
+      }, 9000);
     },
   }).catch(() => {});
 }
@@ -1115,12 +1174,13 @@ chrome.debugger.onEvent.addListener((source, method, params) => {
 // ── Cleanup on tab events ──────────────────────────────────────────────────────
 
 function clearSessionState() {
+  // Only clear action history and transient state — NOT debuggerActive,
+  // which is managed exclusively by attachDebugger / detachDebugger.
   chrome.storage.local.set({
     actionHistory: [],
     pendingApproval: null,
     approvalResponse: null,
     mobileEmulationActive: false,
-    debuggerActive: false,
   }).catch(() => {});
 }
 
