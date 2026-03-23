@@ -1,6 +1,6 @@
 <div align="center">
 
-# ☕ ClosedLoop — Claude Code Skill & Chrome Extension
+# ☕ ClosedLoop - Claude Code Skill & Chrome Extension
 
 <img src="assets/badges.png" alt="ClosedLoop badges" width="100%"/>
 
@@ -8,9 +8,9 @@
 
 <br/>
 
-😤 **Before:** We all know the loop — your AI agent writes code, can't see the browser, and asks you to open it. You screenshot, paste the error back, and repeat. You're basically a screenshotting intern for your own AI.
+😤 **Before:** We all know the loop - your AI agent writes code, can't see the browser, and asks you to open it. You screenshot, paste the error back, and repeat. You're basically a screenshotting intern for your own AI.
 
-☕ **After:** This skill/extension gives your AI access to your browser so it can check for itself — and **shows you everything it intends to click before it does it.**
+☕ **After:** This skill/extension gives your AI access to your browser so it can check for itself - and **shows you everything it intends to click before it does it.**
 
 <br/>
 
@@ -28,7 +28,7 @@
 
 ---
 
-## ⚠️ WARNING — Public Beta. Not Safe For Production.
+## ⚠️ WARNING - Public Beta. Not Safe For Production.
 
 > **This tool gives an AI agent live control of your real Chrome browser.**
 >
@@ -36,9 +36,9 @@
 
 ClosedLoop is a hobbyist project in public beta. A few honest notes:
 
-- 🚧 **Not production-hardened** — don't run this on a shared or corporate machine
-- 🔓 **The agent has real browser access** — it can click, type, and submit anything on any open tab
-- 🐛 **Rough edges exist** — file an issue if something bites you
+- 🚧 **Not production-hardened** - don't run this on a shared or corporate machine
+- 🔓 **The agent has real browser access** - it can click, type, and submit anything on any open tab
+- 🐛 **Rough edges exist** - file an issue if something bites you
 - 💡 **Use `/request-approval`** to pause and confirm before anything destructive
 
 Built for tinkerers. Works great for personal use. Ship it, but know what you're shipping.
@@ -54,7 +54,7 @@ You're not the developer anymore. **You're the browser intern.**
 <br/>
 
 <div align="center">
-<img src="assets/before.svg" alt="Before ClosedLoop — you are the loop" width="100%"/>
+<img src="assets/before.svg" alt="Before ClosedLoop - you are the loop" width="100%"/>
 </div>
 
 <br/>
@@ -62,12 +62,12 @@ You're not the developer anymore. **You're the browser intern.**
 ## ☕ Close the loop
 
 ClosedLoop connects your agent directly to a live Chrome tab over a secure local bridge.
-The agent navigates, screenshots, clicks, types, and reads its own errors — **all without you lifting a finger.**
+The agent navigates, screenshots, clicks, types, and reads its own errors - **all without you lifting a finger.**
 
 <br/>
 
 <div align="center">
-<img src="assets/after.svg" alt="After ClosedLoop — the loop is closed" width="100%"/>
+<img src="assets/after.svg" alt="After ClosedLoop - the loop is closed" width="100%"/>
 </div>
 
 ---
@@ -84,9 +84,9 @@ The agent navigates, screenshots, clicks, types, and reads its own errors — **
 
 Two pieces. One bridge. Zero babysitting.
 
-**🧩 Chrome Extension** — Manifest V3 extension that receives commands over a local WebSocket and executes them in your real browser tab using native Chrome APIs. Highlights elements before clicking them. Shows a live action feed in a side panel.
+**🧩 Chrome Extension** - Manifest V3 extension that receives commands over a local WebSocket and executes them in your real browser tab using native Chrome APIs. Highlights elements before clicking them. Shows a live action feed in a side panel.
 
-**🖥️ MCP Server** — Node.js server (`localhost:9009`) that bridges your agent and the extension. The agent calls it with `curl`. Results come back as JSON.
+**🖥️ MCP Server** - Node.js server (`localhost:9009`) that bridges your agent and the extension. The agent calls it with `curl`. Results come back as JSON.
 
 Your browser sessions, cookies, and auth tokens **never leave your machine**. Everything is localhost.
 
@@ -96,15 +96,15 @@ Your browser sessions, cookies, and auth tokens **never leave your machine**. Ev
 
 The moment your agent takes control, your browser tells you about it:
 
-**✨ Animated banner** — a gradient pill at the top of the page reading *"An AI agent is controlling this browser tab"* slowly sweeps through purple hues so you always know the agent is driving.
+**✨ Animated banner** - a gradient pill at the top of the page reading *"An AI agent is controlling this browser tab"* slowly sweeps through purple hues so you always know the agent is driving.
 
-**🟡 Element spotlight** — before every click or keystroke, the target element gets an amber glow, a badge saying exactly what's about to happen, and a 2-second countdown bar. You see every move before it fires.
+**🟡 Element spotlight** - before every click or keystroke, the target element gets an amber glow, a badge saying exactly what's about to happen, and a 2-second countdown bar. You see every move before it fires.
 
-**✅ Confirmation flash** — clicks go green (`✓ Clicking!`), type actions go blue (`✎ Typing…`) for a beat before the action fires.
+**✅ Confirmation flash** - clicks go green (`✓ Clicking!`), type actions go blue (`✎ Typing…`) for a beat before the action fires.
 
-**📋 Live side panel** — every action logged in real time with timestamps and inline screenshot previews. Auto-clears on every new session.
+**📋 Live side panel** - every action logged in real time with timestamps and inline screenshot previews. Auto-clears on every new session.
 
-**⚠️ Approval prompts** — for anything risky, the agent can pause and ask you to approve in the side panel before proceeding. A pulsing amber bubble appears in the center of the screen pointing you there.
+**⚠️ Approval prompts** - for anything risky, the agent can pause and ask you to approve in the side panel before proceeding. A pulsing amber bubble appears in the center of the screen pointing you there.
 
 <div align="center">
 <br/>
@@ -114,7 +114,7 @@ The moment your agent takes control, your browser tells you about it:
 <br/><br/>
 <img src="assets/screenshot-popup.png" alt="ClosedLoop extension popup" width="280"/>
 <br/>
-<em>The extension popup — green dot means connected, action log updates in real time.</em>
+<em>The extension popup - green dot means connected, action log updates in real time.</em>
 </div>
 
 ---
@@ -126,9 +126,9 @@ The moment your agent takes control, your browser tells you about it:
 | `POST /navigate` | Navigate to any URL, waits for full page load |
 | `POST /screenshot` | Capture a PNG → saved to `/tmp/closedloop-screenshot.png` |
 | `GET /context` | URL, title, body text, + up to 40 interactive elements with CSS selectors |
-| `POST /click` | Click any element by CSS selector — highlights it first |
+| `POST /click` | Click any element by CSS selector - highlights it first |
 | `POST /type` | Type into any input (React-compatible, clears first) |
-| `POST /attach-debugger` | Attach Chrome DevTools Protocol — enables error capture |
+| `POST /attach-debugger` | Attach Chrome DevTools Protocol - enables error capture |
 | `GET /console-errors` | All JS errors + exceptions since last attach |
 | `GET /network-errors` | All 4xx/5xx + failed requests since last attach |
 | `POST /request-approval` | Pause and ask the user to approve before proceeding |
@@ -162,7 +162,7 @@ node mcp-server/server.js
 1. Open Chrome → `chrome://extensions`
 2. Enable **Developer mode** (top-right toggle)
 3. Click **Load unpacked** → select the `extension/` folder
-4. Pin the ClosedLoop icon — badge turns **green** when connected
+4. Pin the ClosedLoop icon - badge turns **green** when connected
 
 ### 4️⃣ Point your agent at it
 
@@ -172,11 +172,11 @@ Click **"Copy instructions for your AI"** in the popup and paste into Claude Cod
 
 ## 🧪 Try the Demo
 
-A **broken calculator** ships in `demo/calculator/`. It has intentional bugs. Ask your agent to find them, fix them, and verify the fix — without you touching the browser once.
+A **broken calculator** ships in `demo/calculator/`. It has intentional bugs. Ask your agent to find them, fix them, and verify the fix - without you touching the browser once.
 
 ```
 "Open the demo calculator at file:///YOUR_PATH/closeloop/demo/calculator/index.html,
-find what's broken, fix it, and verify it works — all in the browser."
+find what's broken, fix it, and verify it works - all in the browser."
 ```
 
 Watch the side panel. Watch the highlights. Go get a coffee.
@@ -187,10 +187,10 @@ Watch the side panel. Watch the highlights. Go get a coffee.
 
 This is a **local-only tool**. Here's what that means in practice:
 
-- 🔐 The WebSocket server binds to `127.0.0.1` — **never exposed to the network**
+- 🔐 The WebSocket server binds to `127.0.0.1` - **never exposed to the network**
 - 🍪 Your browser sessions, cookies, and auth tokens stay on your machine
 - 🚫 No cloud relay, no telemetry, no remote control surface
-- ✅ The extension uses `"host_permissions": ["<all_urls>"]` — required for scripting and debugger APIs, standard for browser automation
+- ✅ The extension uses `"host_permissions": ["<all_urls>"]` - required for scripting and debugger APIs, standard for browser automation
 
 ---
 
@@ -199,16 +199,16 @@ This is a **local-only tool**. Here's what that means in practice:
 ```
 closeloop/
 ├── extension/             Chrome Manifest V3 extension
-│   ├── background.js      Service worker — WebSocket client, all command handlers
-│   ├── popup.html/js      Extension popup — status, screenshot preview
+│   ├── background.js      Service worker - WebSocket client, all command handlers
+│   ├── popup.html/js      Extension popup - status, screenshot preview
 │   ├── sidepanel.html/js  Live action feed (native Chrome side panel)
 │   └── manifest.json
 ├── mcp-server/
 │   └── server.js          Express + WebSocket bridge on port 9009
 ├── demo/
-│   └── calculator/        Intentionally broken calculator — use it to test
+│   └── calculator/        Intentionally broken calculator - use it to test
 └── .claude/
-    └── skills/closeloop/  Claude Code skill — invoke with /closeloop
+    └── skills/closeloop/  Claude Code skill - invoke with /closeloop
 ```
 
 ---
@@ -223,7 +223,7 @@ closeloop/
 
 ## 📄 License
 
-MIT — see [LICENSE](LICENSE)
+MIT - see [LICENSE](LICENSE)
 
 ---
 
