@@ -8,7 +8,7 @@
 
 😤 **Before ClosedLoop:** **You're basically a screenshotting intern for your own AI.** We all know the loop - your AI agent writes code, can't see the browser, and asks you to open it. You screenshot, paste the error back, and repeat.
 
-☕ **After ClosedLoop:** Tread carefully, but get out of the way for your AI.
+☕ **After ClosedLoop:** This skill/extension gives your AI access to your browser so it can check for itself - and **shows you everything it intends to click before it does it.** Tread carefully, but get out of the way for your AI.
 
 <br/>
 
