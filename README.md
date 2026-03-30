@@ -21,9 +21,18 @@
 ![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-22c55e?style=flat-square&logo=googlechrome&logoColor=white)
 ![Node.js](https://img.shields.io/badge/Node.js-18+-38bdf8?style=flat-square&logo=nodedotjs&logoColor=white)
 ![localhost only](https://img.shields.io/badge/runs-localhost%20only-334155?style=flat-square)
-[![Ko-fi](https://img.shields.io/badge/Ko--fi-Support%20this%20project-ff5f5f?logo=ko-fi&logoColor=white)](https://ko-fi.com/kiki_ai)
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-Donate-ff5f5f?logo=ko-fi&logoColor=white)](https://ko-fi.com/kiki_ai)
 
 </div>
+
+---
+
+## ❤️ Support This Project
+
+ClosedLoop is **free and open source**, built and maintained independently in my spare time. If it's saved you hours of screenshotting, please consider making a small donation — it genuinely helps me keep building tools like this for the community.
+
+> **[☕ Donate on Ko-fi →](https://ko-fi.com/kiki_ai)**
+> Every contribution, no matter the size, goes directly toward keeping these projects alive and shipping new ones.
 
 ---
 
