@@ -63,14 +63,14 @@
     <rect x="56" y="284" width="7" height="13" rx="1" fill="#a78bfa" opacity="0.8"/>
   </g>
 
-  <!-- ── Center: CloseLoop bridge ── -->
+  <!-- ── Center: ClosedLoop bridge ── -->
   <g transform="translate(324, 120)">
     <!-- Bridge box -->
     <rect x="0" y="0" width="132" height="162" rx="12" fill="#1e1b4b" stroke="#4c1d95" stroke-width="1.5" filter="url(#shadow2)"/>
     <!-- Header -->
     <rect x="0" y="0" width="132" height="38" rx="12" fill="#2d1f6e"/>
     <rect x="0" y="26" width="132" height="12" fill="#2d1f6e"/>
-    <text x="66" y="18" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">CloseLoop</text>
+    <text x="66" y="18" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">ClosedLoop</text>
     <text x="66" y="32" text-anchor="middle" font-size="8" fill="#a78bfa" letter-spacing="0.5">BRIDGE</text>
 
     <!-- Green dot -->

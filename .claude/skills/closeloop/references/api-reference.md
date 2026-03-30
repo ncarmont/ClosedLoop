@@ -1,4 +1,4 @@
-# CloseLoop API Reference
+# ClosedLoop API Reference
 
 All endpoints are on `http://localhost:9009`. All POST bodies are JSON.
 Commands time out after 15 seconds. The active tab is whichever Chrome tab is currently focused.

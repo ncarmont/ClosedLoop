@@ -1,13 +1,13 @@
 ---
 name: closeloop
-description: This skill should be used when the user asks to "control the browser", "use CloseLoop", "take a screenshot of the browser", "navigate to a page", "click on the page", "type into the browser", "check console errors", "test the UI in the browser", "use the real browser", "verify the UI", or any task that requires seeing or interacting with the live Chrome browser. This skill provides complete setup, operation, and workflow guidance for the CloseLoop browser automation bridge.
+description: This skill should be used when the user asks to "control the browser", "use ClosedLoop", "take a screenshot of the browser", "navigate to a page", "click on the page", "type into the browser", "check console errors", "test the UI in the browser", "use the real browser", "verify the UI", or any task that requires seeing or interacting with the live Chrome browser. This skill provides complete setup, operation, and workflow guidance for the ClosedLoop browser automation bridge.
 version: 0.1.0
 tools: Bash, Read
 ---
 
-# CloseLoop — Live Browser Control
+# ClosedLoop — Live Browser Control
 
-CloseLoop is a local HTTP bridge between this agent and the user's real Chrome browser. It consists of three parts working together:
+ClosedLoop is a local HTTP bridge between this agent and the user's real Chrome browser. It consists of three parts working together:
 
 | Part | Location | Role |
 |------|----------|------|
@@ -54,7 +54,7 @@ curl -s -X POST http://localhost:9009/navigate \
   -H "Content-Type: application/json" \
   -d "{\"url\": \"file://$(pwd)/demo/calculator/index.html\"}"
 ```
-The demo calculator has intentional bugs — use CloseLoop to find and fix them.
+The demo calculator has intentional bugs — use ClosedLoop to find and fix them.
 
 ---
 
@@ -259,7 +259,7 @@ curl -s -X POST http://localhost:9009/toggle-mobile -H "Content-Type: applicatio
 - **Screenshot after every navigation** — confirm what actually rendered
 - **Get context before clicking** — it returns real DOM selectors, don't guess
 - **Commands time out after 15s** — if a page is slow, navigate then wait
-- **One active tab** — CloseLoop always operates on the currently focused Chrome tab
+- **One active tab** — ClosedLoop always operates on the currently focused Chrome tab
 - **Server port is 9009** — if not running, start with `node mcp-server/server.js`
 
 ## Additional resources

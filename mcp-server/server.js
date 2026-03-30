@@ -33,7 +33,7 @@ let lastAgentCall = null; // track when the AI agent last used the API
 
 wss.on('connection', (ws) => {
   extensionSocket = ws;
-  process.stdout.write('[CloseLoop] Chrome extension connected\n');
+  process.stdout.write('[ClosedLoop] Chrome extension connected\n');
 
   ws.on('message', (data) => {
     try {
@@ -48,7 +48,7 @@ wss.on('connection', (ws) => {
 
   ws.on('close', () => {
     extensionSocket = null;
-    process.stdout.write('[CloseLoop] Chrome extension disconnected\n');
+    process.stdout.write('[ClosedLoop] Chrome extension disconnected\n');
   });
 });
 
@@ -56,7 +56,7 @@ async function sendToExtension(command, params = {}) {
   if (!extensionSocket || extensionSocket.readyState !== 1) {
     throw new Error(
       'Chrome extension not connected. ' +
-      'Make sure CloseLoop is installed and the popup shows a green dot.'
+      'Make sure ClosedLoop is installed and the popup shows a green dot.'
     );
   }
   const id = nextId++;
@@ -191,6 +191,56 @@ app.post('/toggle-mobile', trackAgentCall, async (req, res) => {
   }
 });
 
+// Reload the Chrome extension — picks up background.js changes without touching the page DOM
+app.post('/reload-extension', async (req, res) => {
+  try {
+    sendToExtension('reload_extension').catch(() => {}); // fire-and-forget — WS closes on reload
+    res.json({ reloading: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Execute arbitrary JavaScript in the active tab
+// Body: { "script": "document.title" }
+// Returns: { "result": "..." } or { "error": "..." }
+app.post('/execute-js', trackAgentCall, async (req, res) => {
+  try {
+    res.json(await sendToExtension('execute_js', req.body));
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Set files on a file input element using Chrome DevTools Protocol
+// Body: { "selector": "input[type='file']", "paths": ["/tmp/file.png"] }
+app.post('/upload-file', trackAgentCall, async (req, res) => {
+  try {
+    res.json(await sendToExtension('upload_file', req.body));
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Get all buttons on the current page (bypasses the 100-element context limit)
+app.get('/buttons', trackAgentCall, async (req, res) => {
+  try {
+    res.json(await sendToExtension('get_all_buttons'));
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Click a button by its visible text (case-insensitive, partial match fallback)
+// Body: { "text": "Save" }
+app.post('/click-button', trackAgentCall, async (req, res) => {
+  try {
+    res.json(await sendToExtension('click_button_by_text', req.body));
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 app.post('/reset-history', async (req, res) => {
   try {
     res.json(await sendToExtension('clear_history'));
@@ -202,8 +252,8 @@ app.post('/reset-history', async (req, res) => {
 // ── Start ─────────────────────────────────────────────────────────────────────
 
 httpServer.listen(PORT, 'localhost', () => {
-  process.stdout.write(`\n[CloseLoop] Server running at http://localhost:${PORT}\n`);
-  process.stdout.write('[CloseLoop] Waiting for Chrome extension to connect...\n\n');
+  process.stdout.write(`\n[ClosedLoop] Server running at http://localhost:${PORT}\n`);
+  process.stdout.write('[ClosedLoop] Waiting for Chrome extension to connect...\n\n');
   process.stdout.write('AI agent endpoints:\n');
   process.stdout.write(`  GET  http://localhost:${PORT}/context\n`);
   process.stdout.write(`  POST http://localhost:${PORT}/screenshot   (saves to /tmp/closedloop-screenshot.png)\n`);

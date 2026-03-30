@@ -807,6 +807,11 @@ async function handleCommand(msg) {
       case 'get_network_errors': result = { errors: networkErrors.splice(0) }; break;
       case 'toggle_mobile':      result = await toggleMobile(msg.params); break;
       case 'request_approval':   result = await requestApproval(msg.params); break;
+      case 'execute_js':         result = await executeJs(msg.params); break;
+      case 'get_all_buttons':    result = await getAllButtons(); break;
+      case 'upload_file':        result = await uploadFile(msg.params); break;
+      case 'click_button_by_text': result = await clickButtonByText(msg.params); break;
+      case 'reload_extension':   chrome.runtime.reload(); return { reloading: true };
 
       case 'navigate_to':
         result = await navigateTo(msg.params);
@@ -841,7 +846,7 @@ async function getPageContext() {
     func: () => {
       const interactable = Array.from(
         document.querySelectorAll('button, input, select, textarea, a[href], [role="button"], [onclick]')
-      ).slice(0, 40).map(el => {
+      ).slice(0, 100).map(el => {
         let selector = null;
         if (el.id) {
           selector = `#${CSS.escape(el.id)}`;
@@ -873,9 +878,88 @@ async function getPageContext() {
   return result.result;
 }
 
+async function executeJs({ script }) {
+  // eval is blocked by strict CSPs (e.g. appstoreconnect.apple.com).
+  // Use get_all_buttons / click_button_by_text for element discovery instead.
+  return { error: 'eval blocked by page CSP — use get_all_buttons or click_button_by_text instead' };
+}
+
+async function getAllButtons() {
+  const tab = await getActiveTab();
+  const [result] = await chrome.scripting.executeScript({
+    target: { tabId: tab.id },
+    func: () => {
+      const seen = new Set();
+      return Array.from(document.querySelectorAll('button, [role="button"], input[type="submit"], input[type="button"], a.button, .btn'))
+        .map(el => {
+          const text = (el.textContent || el.value || el.getAttribute('aria-label') || '').trim().slice(0, 80);
+          let sel = null;
+          if (el.id) sel = '#' + CSS.escape(el.id);
+          else if (el.getAttribute('aria-label')) sel = `[aria-label="${el.getAttribute('aria-label')}"]`;
+          else if (el.getAttribute('data-testid')) sel = `[data-testid="${el.getAttribute('data-testid')}"]`;
+          else if (el.className && typeof el.className === 'string') {
+            const cls = el.className.trim().split(/\s+/).slice(0, 2).join('.');
+            if (cls) sel = el.tagName.toLowerCase() + '.' + cls;
+          }
+          const key = sel + '|' + text;
+          if (!sel || seen.has(key)) return null;
+          seen.add(key);
+          return { text, selector: sel, tag: el.tagName.toLowerCase(), disabled: el.disabled || false };
+        })
+        .filter(Boolean);
+    },
+  });
+  return { buttons: result.result };
+}
+
+async function clickButtonByText({ text }) {
+  const tab = await getActiveTab();
+  const [result] = await chrome.scripting.executeScript({
+    target: { tabId: tab.id },
+    func: (searchText) => {
+      const lower = searchText.toLowerCase();
+      const buttons = Array.from(document.querySelectorAll('button, [role="button"], input[type="submit"]'));
+      const match = buttons.find(el =>
+        (el.textContent || el.value || el.getAttribute('aria-label') || '').trim().toLowerCase() === lower
+      ) || buttons.find(el =>
+        (el.textContent || el.value || el.getAttribute('aria-label') || '').trim().toLowerCase().includes(lower)
+      );
+      if (!match) return { error: `No button found with text: ${searchText}` };
+      match.scrollIntoView({ block: 'center', behavior: 'instant' });
+      match.click();
+      return { clicked: (match.textContent || match.value || '').trim().slice(0, 60) };
+    },
+    args: [text],
+  });
+  return result.result;
+}
+
 async function takeScreenshot() {
   const tab = await getActiveTab();
+  // Hide ClosedLoop overlay + banner before capturing so screenshots are clean
+  await chrome.scripting.executeScript({
+    target: { tabId: tab.id },
+    func: () => {
+      const ids = ['__closeloop_sidebar__', '__cl_tab__', '__closeloop_ring__', '__closeloop_banner__'];
+      ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.setProperty('display', 'none', 'important');
+      });
+    },
+  }).catch(() => {});
+  await new Promise(r => setTimeout(r, 80)); // one paint frame
   const dataUrl = await chrome.tabs.captureVisibleTab(tab.windowId, { format: 'png' });
+  // Restore overlay
+  await chrome.scripting.executeScript({
+    target: { tabId: tab.id },
+    func: () => {
+      const ids = ['__closeloop_sidebar__', '__cl_tab__', '__closeloop_ring__', '__closeloop_banner__'];
+      ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.removeProperty('display');
+      });
+    },
+  }).catch(() => {});
   chrome.storage.local.set({
     lastScreenshot: dataUrl,
     lastScreenshotTime: Date.now(),
@@ -995,6 +1079,77 @@ async function navigateTo({ url }) {
   });
   const updated = await chrome.tabs.get(tab.id);
   return { navigated: url, title: updated.title };
+}
+
+async function uploadFile({ selector, paths }) {
+  const tab = await getActiveTab();
+  // Ensure debugger is attached
+  if (debuggingTabId !== tab.id) {
+    if (debuggingTabId) {
+      try { await chrome.debugger.detach({ tabId: debuggingTabId }); } catch {}
+    }
+    try {
+      await chrome.debugger.attach({ tabId: tab.id }, '1.3');
+    } catch (e) {
+      if (!e.message?.includes('already attached')) throw e;
+    }
+    debuggingTabId = tab.id;
+  }
+  const fileList = Array.isArray(paths) ? paths : [paths];
+
+  // Strategy 1: intercept the file chooser dialog
+  // Enable interception, click the trigger element, then handle the chooser
+  try {
+    await chrome.debugger.sendCommand({ tabId: tab.id }, 'Page.setInterceptFileChooserDialog', { enabled: true });
+
+    // Listen for the fileChooserOpened event
+    const fileChooserPromise = new Promise((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error('File chooser did not open within 5s')), 5000);
+      function listener(source, method, params) {
+        if (source.tabId === tab.id && method === 'Page.fileChooserOpened') {
+          chrome.debugger.onEvent.removeListener(listener);
+          clearTimeout(timer);
+          resolve(params);
+        }
+      }
+      chrome.debugger.onEvent.addListener(listener);
+    });
+
+    // Click the trigger (button or label)
+    await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      func: (sel) => {
+        const el = document.querySelector(sel);
+        if (el) { el.scrollIntoView({ block: 'center' }); el.click(); }
+      },
+      args: [selector],
+    });
+
+    // Wait for file chooser and handle it
+    const chooser = await fileChooserPromise;
+    await chrome.debugger.sendCommand({ tabId: tab.id }, 'Page.handleFileChooser', {
+      action: 'accept',
+      files: fileList,
+    });
+    await chrome.debugger.sendCommand({ tabId: tab.id }, 'Page.setInterceptFileChooserDialog', { enabled: false });
+    return { uploaded: fileList.length, files: fileList, method: 'fileChooserIntercepted' };
+
+  } catch (e) {
+    // Strategy 2: fall back to DOM.setFileInputFiles on the selector directly
+    await chrome.debugger.sendCommand({ tabId: tab.id }, 'Page.setInterceptFileChooserDialog', { enabled: false }).catch(() => {});
+    try {
+      const doc = await chrome.debugger.sendCommand({ tabId: tab.id }, 'DOM.getDocument', { depth: 0 });
+      const { nodeId } = await chrome.debugger.sendCommand({ tabId: tab.id }, 'DOM.querySelector', {
+        nodeId: doc.root.nodeId,
+        selector,
+      });
+      if (!nodeId) return { error: `No element found: ${selector}` };
+      await chrome.debugger.sendCommand({ tabId: tab.id }, 'DOM.setFileInputFiles', { nodeId, files: fileList });
+      return { uploaded: fileList.length, files: fileList, method: 'setFileInputFiles' };
+    } catch (e2) {
+      return { error: e2.message };
+    }
+  }
 }
 
 async function attachDebugger() {

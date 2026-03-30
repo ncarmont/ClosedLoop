@@ -5,7 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SERVER_PATH="$SCRIPT_DIR/mcp-server/server.js"
 
 echo ""
-echo "CloseLoop setup"
+echo "ClosedLoop setup"
 echo "================"
 echo ""
 

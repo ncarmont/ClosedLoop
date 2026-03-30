@@ -1,4 +1,4 @@
-# CloseLoop Workflow Patterns
+# ClosedLoop Workflow Patterns
 
 Common multi-step recipes. Adapt selectors and URLs to the actual app.
 

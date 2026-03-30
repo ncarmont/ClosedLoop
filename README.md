@@ -21,6 +21,7 @@
 ![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-22c55e?style=flat-square&logo=googlechrome&logoColor=white)
 ![Node.js](https://img.shields.io/badge/Node.js-18+-38bdf8?style=flat-square&logo=nodedotjs&logoColor=white)
 ![localhost only](https://img.shields.io/badge/runs-localhost%20only-334155?style=flat-square)
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-Support%20this%20project-ff5f5f?logo=ko-fi&logoColor=white)](https://ko-fi.com/kiki_ai)
 
 </div>
 
@@ -216,6 +217,14 @@ closeloop/
 - Node.js 18+
 - Google Chrome 114+
 - Any AI agent with a Bash tool (Claude Code, Cursor, Cline, Zed, etc.)
+
+---
+
+## ☕ Support
+
+If ClosedLoop has saved you from being a screenshotting intern, consider buying me a coffee. I love building developer tools, and your support helps me keep shipping.
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/kiki_ai)
 
 ---
 
