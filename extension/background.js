@@ -2,10 +2,116 @@
 // Connects to the local MCP bridge at ws://localhost:9009
 
 const WS_URL = 'ws://localhost:9009';
+const SESSION_ALARM = 'sessionTick';
+const SESSION_IDLE_TIMEOUT_MS = 10 * 60 * 1000;
+const SESSION_MAX_DURATION_MS = 30 * 60 * 1000;
+const SESSION_ALARM_PERIOD_MINUTES = 1;
+const RECONNECT_BASE_DELAY_MS = 3_000;
+const RECONNECT_MAX_DELAY_MS = 30_000;
+
 let ws = null;
 let debuggingTabId = null;
 let consoleErrors = [];
 let networkErrors = [];
+let reconnectTimer = null;
+let reconnectDelayMs = RECONNECT_BASE_DELAY_MS;
+let sessionState = createInactiveSessionState();
+
+function createInactiveSessionState(reason = 'idle') {
+  return {
+    active: false,
+    startedAt: null,
+    lastActivityAt: null,
+    hardDeadlineAt: null,
+    stopReason: reason,
+  };
+}
+
+function getSessionStatus() {
+  if (!sessionState.active) return 'idle';
+  if (ws && ws.readyState === WebSocket.OPEN) return 'connected';
+  return 'connecting';
+}
+
+function getSessionSnapshot() {
+  const idleDeadlineAt = sessionState.lastActivityAt
+    ? sessionState.lastActivityAt + SESSION_IDLE_TIMEOUT_MS
+    : null;
+  const hardDeadlineAt = sessionState.hardDeadlineAt;
+  const expiryCandidates = [idleDeadlineAt, hardDeadlineAt].filter(Boolean);
+  const expiresAt = expiryCandidates.length ? Math.min(...expiryCandidates) : null;
+
+  return {
+    active: sessionState.active,
+    status: getSessionStatus(),
+    connected: !!ws && ws.readyState === WebSocket.OPEN,
+    startedAt: sessionState.startedAt,
+    lastActivityAt: sessionState.lastActivityAt,
+    idleDeadlineAt,
+    hardDeadlineAt,
+    expiresAt,
+    debuggerAttached: debuggingTabId !== null,
+    stopReason: sessionState.stopReason,
+  };
+}
+
+function getSessionExpiryReason(now = Date.now()) {
+  if (!sessionState.active) return null;
+  if (sessionState.hardDeadlineAt && now >= sessionState.hardDeadlineAt) return 'max-duration';
+  if (
+    sessionState.lastActivityAt &&
+    now >= sessionState.lastActivityAt + SESSION_IDLE_TIMEOUT_MS
+  ) {
+    return 'idle-timeout';
+  }
+  return null;
+}
+
+function markSessionActivity() {
+  if (!sessionState.active) return;
+  sessionState.lastActivityAt = Date.now();
+}
+
+function clearReconnectTimer() {
+  if (reconnectTimer) {
+    clearTimeout(reconnectTimer);
+    reconnectTimer = null;
+  }
+}
+
+function ensureSessionAlarm() {
+  if (sessionState.active) {
+    chrome.alarms.create(SESSION_ALARM, { periodInMinutes: SESSION_ALARM_PERIOD_MINUTES });
+  } else {
+    chrome.alarms.clear(SESSION_ALARM);
+  }
+}
+
+function scheduleReconnect() {
+  if (!sessionState.active || reconnectTimer) return;
+
+  reconnectTimer = setTimeout(() => {
+    reconnectTimer = null;
+    connect();
+  }, reconnectDelayMs);
+  reconnectDelayMs = Math.min(reconnectDelayMs * 2, RECONNECT_MAX_DELAY_MS);
+}
+
+function setIdleBadge() {
+  setBadge('OFF', '#64748b');
+}
+
+function setConnectingBadge() {
+  setBadge('WAIT', '#f59e0b');
+}
+
+function setLiveBadge() {
+  setBadge('ON', '#22c55e');
+}
+
+function setErrorBadge() {
+  setBadge('ERR', '#ef4444');
+}
 
 // ── Agent banner pill ──────────────────────────────────────────────────────────
 //
@@ -475,6 +581,33 @@ async function injectSidebar(tabId) {
   } catch {}
 }
 
+async function showSessionUi(tabId) {
+  showAgentRing(tabId);
+  await injectSidebar(tabId);
+}
+
+async function removeInjectedUiFromAllTabs() {
+  const tabs = await chrome.tabs.query({});
+  await Promise.all(tabs.map((tab) => {
+    if (!tab.id) return null;
+    return chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      func: () => {
+        [
+          '__closeloop_sidebar__',
+          '__cl_style__',
+          '__cl_tab__',
+          '__closeloop_ring__',
+          '__closeloop_ring_style__',
+          '__cl_pre_action__',
+          '__cl_pre_badge__',
+          '__cl_pre_style__',
+        ].forEach((id) => document.getElementById(id)?.remove());
+      },
+    }).catch(() => {});
+  }));
+}
+
 // ── Pre-action element highlight ──────────────────────────────────────────────
 //
 // Called before click/type so the user can see exactly what element is about
@@ -641,8 +774,7 @@ async function requestApproval({ action = 'Proceed with action', reason = '' } =
   const tab = await getActiveTab();
 
   // Make sure the sidebar is visible so the user can see the approval card
-  showAgentRing(tab.id);
-  await injectSidebar(tab.id);
+  await showSessionUi(tab.id);
 
   // Write the pending request — injected sidebar polls and renders the card
   await chrome.storage.local.set({
@@ -709,38 +841,108 @@ async function recordAction(command, params, result) {
   await chrome.storage.local.set({ actionHistory }).catch(() => {});
 }
 
-// ── Keep service worker alive ──────────────────────────────────────────────────
+// ── Session lifecycle ──────────────────────────────────────────────────────────
 
-chrome.alarms.create('keepAlive', { periodInMinutes: 0.4 });
+async function startSession() {
+  if (sessionState.active) {
+    markSessionActivity();
+    ensureSessionAlarm();
+    connect();
+    return getSessionSnapshot();
+  }
+
+  const now = Date.now();
+  sessionState = {
+    active: true,
+    startedAt: now,
+    lastActivityAt: now,
+    hardDeadlineAt: now + SESSION_MAX_DURATION_MS,
+    stopReason: null,
+  };
+
+  clearReconnectTimer();
+  reconnectDelayMs = RECONNECT_BASE_DELAY_MS;
+  ensureSessionAlarm();
+  await clearTransientState();
+  await detachDebugger().catch(() => {});
+  await removeInjectedUiFromAllTabs().catch(() => {});
+  setConnectingBadge();
+  connect();
+
+  return getSessionSnapshot();
+}
+
+async function stopSession(reason = 'manual-stop') {
+  const wasActive = sessionState.active;
+
+  sessionState = createInactiveSessionState(reason);
+  clearReconnectTimer();
+  ensureSessionAlarm();
+
+  const socket = ws;
+  ws = null;
+  if (socket && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)) {
+    try { socket.close(); } catch {}
+  }
+
+  await detachDebugger().catch(() => {});
+  await clearTransientState();
+  await removeInjectedUiFromAllTabs().catch(() => {});
+  setIdleBadge();
+
+  return {
+    ...getSessionSnapshot(),
+    stopped: wasActive,
+  };
+}
+
 chrome.alarms.onAlarm.addListener((alarm) => {
-  if (alarm.name === 'keepAlive') {
-    if (!ws || ws.readyState === WebSocket.CLOSED || ws.readyState === WebSocket.CLOSING) {
-      connect();
-    }
+  if (alarm.name !== SESSION_ALARM) return;
+
+  const expiryReason = getSessionExpiryReason();
+  if (expiryReason) {
+    stopSession(expiryReason).catch(() => {});
+    return;
+  }
+
+  if (!sessionState.active) {
+    chrome.alarms.clear(SESSION_ALARM);
+    return;
+  }
+
+  if (!ws || ws.readyState === WebSocket.CLOSED || ws.readyState === WebSocket.CLOSING) {
+    connect();
   }
 });
 
 // ── WebSocket connection ───────────────────────────────────────────────────────
 
 function connect() {
+  if (!sessionState.active) return;
+  if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) return;
+
+  clearReconnectTimer();
+  setConnectingBadge();
+
+  let socket;
   try {
-    ws = new WebSocket(WS_URL);
+    socket = new WebSocket(WS_URL);
   } catch (e) {
-    setBadge('OFF', '#ef4444');
+    setErrorBadge();
+    scheduleReconnect();
     return;
   }
 
-  ws.onopen = () => {
-    setBadge('ON', '#22c55e');
-    // Clear sidebar history and any stale approval state on every new session
-    chrome.storage.local.set({
-      actionHistory: [],
-      pendingApproval: null,
-      approvalResponse: null,
-      mobileEmulationActive: false,
-    }).catch(() => {});
-    // Forcefully remove any full-page ring overlay left in the active tab's DOM
-    // (covers the case where old extension code had already injected it)
+  ws = socket;
+
+  socket.onopen = () => {
+    if (ws !== socket || !sessionState.active) {
+      try { socket.close(); } catch {}
+      return;
+    }
+
+    reconnectDelayMs = RECONNECT_BASE_DELAY_MS;
+    setLiveBadge();
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (!tabs[0]) return;
       chrome.scripting.executeScript({
@@ -753,21 +955,46 @@ function connect() {
     });
   };
 
-  ws.onmessage = async (event) => {
+  socket.onmessage = async (event) => {
+    if (ws !== socket || !sessionState.active) return;
+
     let msg;
     try { msg = JSON.parse(event.data); } catch { return; }
+
+    const expiryReason = getSessionExpiryReason();
+    if (expiryReason) {
+      if (socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify({
+          id: msg.id,
+          result: { error: 'ClosedLoop session expired. Start a new session from the popup.' },
+        }));
+      }
+      await stopSession(expiryReason).catch(() => {});
+      return;
+    }
+
+    markSessionActivity();
     const result = await handleCommand(msg);
-    if (ws.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify({ id: msg.id, result }));
+    if (socket.readyState === WebSocket.OPEN) {
+      socket.send(JSON.stringify({ id: msg.id, result }));
     }
   };
 
-  ws.onclose = () => {
-    setBadge('OFF', '#ef4444');
-    setTimeout(connect, 3000);
+  socket.onclose = () => {
+    if (ws === socket) ws = null;
+
+    if (!sessionState.active) {
+      setIdleBadge();
+      return;
+    }
+
+    setErrorBadge();
+    scheduleReconnect();
   };
 
-  ws.onerror = () => ws.close();
+  socket.onerror = () => {
+    try { socket.close(); } catch {}
+  };
 }
 
 function setBadge(text, color) {
@@ -784,14 +1011,17 @@ async function getActiveTab() {
 // ── Command handler ────────────────────────────────────────────────────────────
 
 async function handleCommand(msg) {
+  if (!sessionState.active) {
+    return { error: 'ClosedLoop is idle. Start a session from the popup first.' };
+  }
+
   // Inject ring + sidebar into the active tab on every command.
   // injectSidebar uses executeScript which works without a user gesture,
   // unlike chrome.sidePanel.open() which is silently blocked here.
   let activeTab = null;
   try {
     activeTab = await getActiveTab();
-    showAgentRing(activeTab.id);
-    injectSidebar(activeTab.id);
+    await showSessionUi(activeTab.id);
   } catch {}
 
   let result;
@@ -818,8 +1048,7 @@ async function handleCommand(msg) {
         // Page DOM was replaced — re-inject ring and sidebar into the new page
         try {
           const newTab = await getActiveTab();
-          showAgentRing(newTab.id);
-          injectSidebar(newTab.id);
+          await showSessionUi(newTab.id);
         } catch {}
         break;
 
@@ -1265,10 +1494,36 @@ chrome.debugger.onEvent.addListener((source, method, params) => {
 
 // ── Cleanup on tab events ──────────────────────────────────────────────────────
 
-function clearSessionState() {
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  if (!message || !message.type) return undefined;
+
+  (async () => {
+    try {
+      switch (message.type) {
+        case 'get_session_state':
+          sendResponse({ ok: true, session: getSessionSnapshot() });
+          return;
+        case 'start_session':
+          sendResponse({ ok: true, session: await startSession() });
+          return;
+        case 'stop_session':
+          sendResponse({ ok: true, session: await stopSession('manual-stop') });
+          return;
+        default:
+          sendResponse({ ok: false, error: `Unknown message type: ${message.type}` });
+      }
+    } catch (error) {
+      sendResponse({ ok: false, error: error.message });
+    }
+  })();
+
+  return true;
+});
+
+async function clearTransientState() {
   // Only clear action history and transient state — NOT debuggerActive,
   // which is managed exclusively by attachDebugger / detachDebugger.
-  chrome.storage.local.set({
+  await chrome.storage.local.set({
     actionHistory: [],
     pendingApproval: null,
     approvalResponse: null,
@@ -1277,20 +1532,27 @@ function clearSessionState() {
 }
 
 chrome.tabs.onRemoved.addListener((tabId) => {
-  if (tabId === debuggingTabId) {
+  const removedDebugTab = tabId === debuggingTabId;
+  if (removedDebugTab) {
     debuggingTabId = null;
   }
-  clearSessionState();
+  if (removedDebugTab && sessionState.active) {
+    stopSession('debug-tab-closed').catch(() => {});
+  }
 });
 
-// Clear history whenever the user switches to a different tab
+// Stop the session if focus changes to a different tab.
 chrome.tabs.onActivated.addListener(() => {
-  clearSessionState();
+  if (sessionState.active) {
+    stopSession('tab-changed').catch(() => {});
+  }
 });
 
-// Clear history whenever a new tab is created
+// Stop the session when a new tab is spawned to avoid background control surprises.
 chrome.tabs.onCreated.addListener(() => {
-  clearSessionState();
+  if (sessionState.active) {
+    stopSession('tab-created').catch(() => {});
+  }
 });
 
-connect();
+setIdleBadge();

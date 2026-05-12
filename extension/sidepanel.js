@@ -105,6 +105,14 @@ function escHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
+async function getSessionState() {
+  const response = await chrome.runtime.sendMessage({ type: 'get_session_state' });
+  if (!response?.ok) {
+    throw new Error(response?.error || 'Failed to read session state');
+  }
+  return response.session;
+}
+
 // ── Poll ──────────────────────────────────────────────────────────────────────
 
 async function poll() {
@@ -119,34 +127,44 @@ async function poll() {
   renderHistory(history, localData.lastScreenshot || null);
 
   // Check server for agent activity
+  const dot = document.getElementById('status-dot');
+  const text = document.getElementById('status-text');
+  const banner = document.getElementById('agent-banner');
+
   try {
-    const res = await fetch(`${SERVER}/status`, { signal: AbortSignal.timeout(1500) });
-    const data = await res.json();
-    const connected = data.extensionConnected;
-    const lastCall = data.lastAgentCall;
+    const [statusResult, sessionResult] = await Promise.allSettled([
+      fetch(`${SERVER}/status`, { signal: AbortSignal.timeout(1500) }).then((res) => res.json()),
+      getSessionState(),
+    ]);
+
+    const serverOnline = statusResult.status === 'fulfilled';
+    const status = serverOnline ? statusResult.value : { extensionConnected: false, lastAgentCall: null };
+    const session = sessionResult.status === 'fulfilled' ? sessionResult.value : { active: false };
+    const connected = !!status.extensionConnected;
+    const lastCall = status.lastAgentCall;
     const agentActive = lastCall && (Date.now() - lastCall.at) < AGENT_ACTIVE_MS;
 
-    const dot = document.getElementById('status-dot');
-    const text = document.getElementById('status-text');
-    const banner = document.getElementById('agent-banner');
-
-    if (!connected) {
-      dot.className = 'dot off';
-      text.textContent = 'Disconnected';
-      banner.classList.remove('visible');
-    } else if (agentActive) {
+    if (agentActive) {
       dot.className = 'dot agent pulse';
       text.textContent = 'Agent active';
       banner.classList.add('visible');
-    } else {
+    } else if (connected) {
       dot.className = 'dot on';
-      text.textContent = 'Connected';
+      text.textContent = 'Session live';
+      banner.classList.remove('visible');
+    } else if (session.active) {
+      dot.className = 'dot agent';
+      text.textContent = serverOnline ? 'Session armed' : 'Waiting for server';
+      banner.classList.remove('visible');
+    } else {
+      dot.className = 'dot off';
+      text.textContent = serverOnline ? 'Idle' : 'Server offline';
       banner.classList.remove('visible');
     }
   } catch {
-    document.getElementById('status-dot').className = 'dot off';
-    document.getElementById('status-text').textContent = 'Server offline';
-    document.getElementById('agent-banner').classList.remove('visible');
+    dot.className = 'dot off';
+    text.textContent = 'Server offline';
+    banner.classList.remove('visible');
   }
 }
 

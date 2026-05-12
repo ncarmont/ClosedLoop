@@ -1,7 +1,10 @@
 const SERVER = 'http://localhost:9009';
-const AGENT_ACTIVE_WINDOW_MS = 10_000; // show "AI agent active" for 10s after last call
+const AGENT_ACTIVE_WINDOW_MS = 10_000;
 
-const INSTRUCTIONS = `You have access to ClosedLoop — a live HTTP bridge to my real Chrome browser.
+const INSTRUCTIONS = `ClosedLoop now requires a manual session start from the Chrome popup.
+I will start the session myself before asking you to use these endpoints.
+Sessions auto-stop after 10 minutes of inactivity or 30 minutes total.
+
 The server is running at http://localhost:9009.
 
 Use these curl commands (via the Bash tool) to interact with my browser:
@@ -11,7 +14,6 @@ curl -s -X POST http://localhost:9009/attach-debugger
 
 # 2. Take a screenshot (saved to /tmp/closedloop-screenshot.png)
 curl -s -X POST http://localhost:9009/screenshot
-# Then use the Read tool to view it: Read /tmp/closedloop-screenshot.png
 
 # 3. Get page context (URL, title, body text, all interactive elements + CSS selectors)
 curl -s http://localhost:9009/context
@@ -37,10 +39,43 @@ curl -s http://localhost:9009/console-errors
 # 8. Get network errors (4xx/5xx, failed requests)
 curl -s http://localhost:9009/network-errors
 
-Start now: run attach-debugger, then screenshot (and Read the file), then get context.
-You do not need to ask me to click anything — use the tools above to do it yourself.`;
+Start with attach-debugger, then screenshot, then context.`;
 
-// ── UI helpers ────────────────────────────────────────────────────────────────
+let sessionActionPending = false;
+
+function formatDuration(ms) {
+  const totalSeconds = Math.max(0, Math.round(ms / 1000));
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  if (minutes <= 0) return `${seconds}s`;
+  if (seconds === 0) return `${minutes}m`;
+  return `${minutes}m ${seconds}s`;
+}
+
+function describeStopReason(reason) {
+  switch (reason) {
+    case 'manual-stop': return 'Stopped manually';
+    case 'idle-timeout': return 'Stopped after 10m idle';
+    case 'max-duration': return 'Stopped after 30m max runtime';
+    case 'tab-changed': return 'Stopped because the active tab changed';
+    case 'tab-created': return 'Stopped because a new tab opened';
+    case 'debug-tab-closed': return 'Stopped because the controlled tab closed';
+    case 'idle':
+    case null:
+    case undefined:
+      return 'Browser control is disabled until you start a session.';
+    default:
+      return `Stopped: ${reason}`;
+  }
+}
+
+async function sendBackgroundMessage(type) {
+  const response = await chrome.runtime.sendMessage({ type });
+  if (!response?.ok) {
+    throw new Error(response?.error || `Failed to ${type}`);
+  }
+  return response.session;
+}
 
 function setServer(connected, sub) {
   const dot = document.getElementById('server-dot');
@@ -71,7 +106,7 @@ function setAgent(active, lastCall) {
     dot.className = 'dot agent';
     label.textContent = 'AI agent connected';
     const ago = Math.round((Date.now() - lastCall.at) / 1000);
-    sub.textContent = `Last seen ${ago}s ago — ${lastCall.endpoint}`;
+    sub.textContent = `Last seen ${ago}s ago - ${lastCall.endpoint}`;
     card.className = 'status-card';
   } else {
     dot.className = 'dot off';
@@ -81,32 +116,78 @@ function setAgent(active, lastCall) {
   }
 }
 
-// ── Poll the server every 2s ──────────────────────────────────────────────────
+function setSession(session, serverOnline) {
+  const dot = document.getElementById('session-dot');
+  const label = document.getElementById('session-label');
+  const sub = document.getElementById('session-sub');
+  const card = document.getElementById('session-card');
+  const btn = document.getElementById('session-btn');
+  const hint = document.getElementById('session-hint');
 
-async function poll() {
-  try {
-    const res = await fetch(`${SERVER}/status`, { signal: AbortSignal.timeout(2000) });
-    const data = await res.json();
-    const extConnected = data.extensionConnected;
+  const expiresIn = session?.expiresAt ? Math.max(0, session.expiresAt - Date.now()) : null;
 
-    setServer(true, extConnected ? 'Extension connected' : 'Extension not connected');
+  if (session?.active) {
+    dot.className = 'dot ' + (session.connected ? 'on' : 'agent');
+    label.textContent = session.connected ? 'Session live' : 'Session armed';
 
-    if (!extConnected) {
-      setAgent(false, null);
-      return;
-    }
+    const statusText = session.connected
+      ? 'Browser control is enabled.'
+      : serverOnline
+        ? 'Waiting for the localhost bridge to reconnect.'
+        : 'Waiting for the localhost bridge to start.';
 
-    const lastCall = data.lastAgentCall;
-    const agentActive = lastCall && (Date.now() - lastCall.at) < AGENT_ACTIVE_WINDOW_MS;
-    setAgent(agentActive, lastCall);
+    sub.textContent = expiresIn !== null
+      ? `${statusText} Auto-stop in ${formatDuration(expiresIn)}.`
+      : statusText;
 
-  } catch {
-    setServer(false);
-    setAgent(false, null);
+    card.className = 'status-card active';
+    btn.textContent = 'Stop session';
+    btn.className = 'control-btn stop';
+    hint.textContent = 'Manual stop is immediate. Idle timeout is 10m, hard cap is 30m.';
+  } else {
+    dot.className = 'dot off';
+    label.textContent = 'Session idle';
+    sub.textContent = describeStopReason(session?.stopReason);
+    card.className = 'status-card';
+    btn.textContent = 'Start session';
+    btn.className = 'control-btn';
+    hint.textContent = 'ClosedLoop stays disconnected until you explicitly start a session.';
   }
+
+  btn.disabled = sessionActionPending;
 }
 
-// ── Active tab ────────────────────────────────────────────────────────────────
+async function poll() {
+  const [statusResult, sessionResult] = await Promise.allSettled([
+    fetch(`${SERVER}/status`, { signal: AbortSignal.timeout(2000) }).then((res) => res.json()),
+    sendBackgroundMessage('get_session_state'),
+  ]);
+
+  const status = statusResult.status === 'fulfilled'
+    ? statusResult.value
+    : { extensionConnected: false, lastAgentCall: null };
+  const session = sessionResult.status === 'fulfilled'
+    ? sessionResult.value
+    : { active: false, stopReason: 'idle' };
+
+  const serverOnline = statusResult.status === 'fulfilled';
+  const bridgeConnected = !!status.extensionConnected;
+
+  const serverSub = serverOnline
+    ? bridgeConnected
+      ? 'Extension session connected to localhost.'
+      : session.active
+        ? 'Session is armed but the extension is not connected yet.'
+        : 'Bridge is healthy. Start a session to connect the extension.'
+    : 'http://localhost:9009';
+
+  setServer(serverOnline, serverSub);
+  setSession(session, serverOnline);
+
+  const lastCall = status.lastAgentCall;
+  const agentActive = lastCall && (Date.now() - lastCall.at) < AGENT_ACTIVE_WINDOW_MS;
+  setAgent(agentActive, lastCall);
+}
 
 async function updateTab() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -116,14 +197,8 @@ async function updateTab() {
   }
 }
 
-// ── Server start command path ─────────────────────────────────────────────────
-
-// We don't know the install path at runtime, so show a placeholder the user can
-// personalise. The setup.sh script prints the exact command with the real path.
 document.getElementById('start-cmd').textContent =
-  'node /path/to/closedloop/mcp-server/server.js';
-
-// ── Copy button ───────────────────────────────────────────────────────────────
+  'cd /path/to/closedloop && node mcp-server/server.js';
 
 document.getElementById('copy-btn').addEventListener('click', async () => {
   try {
@@ -136,6 +211,7 @@ document.getElementById('copy-btn').addEventListener('click', async () => {
     document.execCommand('copy');
     document.body.removeChild(ta);
   }
+
   const label = document.getElementById('copy-label');
   const btn = document.getElementById('copy-btn');
   label.textContent = 'Copied!';
@@ -146,7 +222,24 @@ document.getElementById('copy-btn').addEventListener('click', async () => {
   }, 2000);
 });
 
-// ── Screenshot preview ────────────────────────────────────────────────────────
+document.getElementById('session-btn').addEventListener('click', async () => {
+  if (sessionActionPending) return;
+
+  sessionActionPending = true;
+  try {
+    const current = await sendBackgroundMessage('get_session_state');
+    if (current.active) {
+      await sendBackgroundMessage('stop_session');
+    } else {
+      await sendBackgroundMessage('start_session');
+    }
+  } catch (error) {
+    document.getElementById('session-sub').textContent = error.message;
+  } finally {
+    sessionActionPending = false;
+    await poll();
+  }
+});
 
 async function updateScreenshot() {
   const data = await chrome.storage.local.get(['lastScreenshot', 'lastScreenshotTime']);
@@ -163,8 +256,6 @@ async function updateScreenshot() {
     }
   }
 }
-
-// ── Init ──────────────────────────────────────────────────────────────────────
 
 poll();
 updateTab();

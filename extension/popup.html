@@ -54,6 +54,34 @@
     .status-label { font-size: 13px; font-weight: 500; }
     .status-sub   { font-size: 10px; color: #64748b; margin-top: 1px; }
 
+    .control-btn {
+      width: 100%;
+      padding: 11px 14px;
+      background: #16a34a;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-bottom: 6px;
+      transition: background 0.15s, opacity 0.15s;
+    }
+    .control-btn:hover { background: #22c55e; }
+    .control-btn.stop { background: #b91c1c; }
+    .control-btn.stop:hover { background: #dc2626; }
+    .control-btn:disabled {
+      cursor: wait;
+      opacity: 0.65;
+    }
+    .session-hint {
+      font-size: 10px;
+      color: #475569;
+      text-align: center;
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+
     /* ── Copy button ── */
     .copy-btn {
       width: 100%; padding: 11px 14px;
@@ -130,6 +158,17 @@
     <span class="badge">BETA</span>
   </div>
 
+  <div class="status-card" id="session-card">
+    <div class="dot" id="session-dot"></div>
+    <div class="status-text">
+      <div class="status-label" id="session-label">Session idle</div>
+      <div class="status-sub" id="session-sub">Browser control is disabled until you start a session.</div>
+    </div>
+  </div>
+
+  <button class="control-btn" id="session-btn">Start session</button>
+  <div class="session-hint" id="session-hint">ClosedLoop stays disconnected until you explicitly start a session.</div>
+
   <!-- Server connection status -->
   <div class="status-card" id="server-card">
     <div class="dot" id="server-dot"></div>
@@ -162,7 +201,7 @@
     </svg>
     <span id="copy-label">Copy instructions for your AI</span>
   </button>
-  <div class="copy-hint">Get more coffees and stop babysitting — close the loop.</div>
+  <div class="copy-hint">Copy the instructions after you have started a session.</div>
 
   <!-- Active tab -->
   <div class="section">
